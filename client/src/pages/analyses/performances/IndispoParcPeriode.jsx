@@ -16,7 +16,7 @@ import {
 } from '@coreui/react'
 import { getIndispoParcPeriodeOptions } from '../../../hooks/useRapports'
 import { toast } from 'react-toastify'
-import { exportExcel } from '../../../utils/func'
+import { exportExcel } from '../../../helpers/func'
 
 const IndispoParcPeriode = () => {
   const [dateDu, setDateDu] = useState(new Date().toISOString().split('T')[0])

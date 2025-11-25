@@ -27,7 +27,7 @@ import {
 import CIcon from '@coreui/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { exportExcel, getMultiplesOf } from '../../utils/func'
+import { exportExcel, getMultiplesOf } from '../../helpers/func'
 import {
   fecthEnginsQuery,
   useCreateEngin,

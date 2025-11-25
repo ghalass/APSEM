@@ -1,6 +1,6 @@
 // api/siteApi.js
-import { API_PATHS } from '../utils/apiPaths'
-import { apiRequest } from '../utils/apiRequest'
+import { API_PATHS } from '../helpers/apiPaths'
+import { apiRequest } from '../helpers/apiRequest'
 
 export const fetchRoles = async () => {
   return apiRequest(API_PATHS.ROLES.GET_ALL_ROLES, 'GET')

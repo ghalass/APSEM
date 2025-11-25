@@ -24,7 +24,7 @@ import {
   useUpdateTypeparc,
 } from '../../hooks/useTypeparcs'
 import { toast } from 'react-toastify'
-import { exportExcel, getMultiplesOf } from '../../utils/func'
+import { exportExcel, getMultiplesOf } from '../../helpers/func'
 import TableHead from './TableHead'
 
 const Typeparcs = () => {

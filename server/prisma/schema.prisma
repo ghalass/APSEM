@@ -12,13 +12,20 @@ datasource db {
 
 // implicite relation between Permission and Role
 model Permission {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   resource String
-  action   String
+  action   Action?
   roles    Role[]
 
   @@unique([resource, action])
   @@map("permission")
+}
+
+enum Action {
+  CREATE
+  READ
+  UPDATE
+  DELETE
 }
 
 model Role {

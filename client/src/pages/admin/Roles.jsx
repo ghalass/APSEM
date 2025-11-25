@@ -15,7 +15,7 @@ import {
   CSpinner,
 } from '@coreui/react'
 import { cilCloudDownload, cilPlus } from '@coreui/icons'
-import { exportExcel } from '../../utils/func'
+import { exportExcel } from '../../helpers/func'
 import AdminLayout from '../../layout/AdminLayout'
 import CIcon from '@coreui/icons-react'
 
@@ -154,7 +154,7 @@ export default function Roles() {
                   </div>
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <small className="text-body-secondary">Ressource</small>
-                    <small className="text-body-secondary">Permission</small>
+                    <small className="text-body-secondary">Action</small>
                   </div>
                   {role?.permissions?.length > 0 ? (
                     role.permissions.map((perm) => (

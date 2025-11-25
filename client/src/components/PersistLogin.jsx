@@ -1,8 +1,8 @@
 import { useAuth } from '../context/Auth'
-import { apiRequest } from '../utils/apiRequest'
+import { apiRequest } from '../helpers/apiRequest'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { API_PATHS } from '../utils/apiPaths'
+import { API_PATHS } from '../helpers/apiPaths'
 import { CSpinner } from '@coreui/react'
 
 const PersistLogin = () => {

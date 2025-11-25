@@ -12,7 +12,7 @@ import {
   CTableHeaderCell,
   CTableRow,
 } from '@coreui/react'
-import { exportExcel } from '../../utils/func'
+import { exportExcel } from '../../helpers/func'
 
 const RapportRje = () => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])

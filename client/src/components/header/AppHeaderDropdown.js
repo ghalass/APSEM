@@ -17,8 +17,8 @@ import { useNavigate } from 'react-router-dom'
 
 // import Cookies from "universal-cookie";
 import { useAuth } from '../../context/Auth'
-import { apiRequest } from '../../utils/apiRequest'
-import { API_PATHS } from '../../utils/apiPaths'
+import { apiRequest } from '../../helpers/apiRequest'
+import { API_PATHS } from '../../helpers/apiPaths'
 
 const AppHeaderDropdown = () => {
   const { user, isAdminOrSuperAdmin, logout } = useAuth()

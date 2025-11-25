@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { getRapportHeuresChassisOptions } from '../../hooks/useRapports'
 import { useQuery } from '@tanstack/react-query'
-import { exportExcel } from '../../utils/func'
+import { exportExcel } from '../../helpers/func'
 import {
   CButton,
   CFormInput,

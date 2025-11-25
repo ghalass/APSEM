@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useGetSaisieHrmDay } from '../../hooks/useSaisieRje'
 import { useQuery } from '@tanstack/react-query'
 import { CButton, CFormInput, CSpinner, CTable } from '@coreui/react'
-import { exportExcel } from '../../utils/func'
+import { exportExcel } from '../../helpers/func'
 
 const SaisieRjeDonnees = () => {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 7))

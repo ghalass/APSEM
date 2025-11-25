@@ -1,6 +1,6 @@
 // api/resourceApi.js
-import { API_PATHS } from '../utils/apiPaths'
-import { apiRequest } from '../utils/apiRequest'
+import { API_PATHS } from '../helpers/apiPaths'
+import { apiRequest } from '../helpers/apiRequest'
 
 export const fetchPermissions = async () => {
   return apiRequest(API_PATHS.PERMISSIONS.GET_ALL_PERMISSIONS, 'GET')

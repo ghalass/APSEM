@@ -13,7 +13,7 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import { useGetAllSaisieLubrifiantByMonth } from '../../../hooks/useSaisieLubrifiant'
-import { exportExcel } from '../../../utils/func'
+import { exportExcel } from '../../../helpers/func'
 
 const Ventilation = () => {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 7))

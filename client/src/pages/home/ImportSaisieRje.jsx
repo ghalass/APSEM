@@ -3,8 +3,8 @@ import { useMutation } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useInjectHRM } from '../../hooks/useSaisieRje'
-import { apiRequest } from '../../utils/apiRequest'
-import { API_PATHS } from '../../utils/apiPaths'
+import { apiRequest } from '../../helpers/apiRequest'
+import { API_PATHS } from '../../helpers/apiPaths'
 
 const ImportSaisieRje = () => {
   const [sheetNames, setSheetNames] = useState([])

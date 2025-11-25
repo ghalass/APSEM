@@ -1,4 +1,4 @@
-import { getUserRole } from '../../utils/func'
+import { getUserRole } from '../../helpers/func'
 import avatar8 from '../../assets/images/avatars/icons8-user-80.png'
 import { useAuth } from '../../context/Auth'
 import {

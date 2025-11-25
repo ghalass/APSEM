@@ -3,7 +3,7 @@ import { useTypelubrifiants } from '../../hooks/useTypelubrifiants'
 import { useQuery } from '@tanstack/react-query'
 import { getRapportSpecLubOptions } from '../../hooks/useRapports'
 import { CBadge, CButton, CFormInput, CFormSelect, CSpinner, CTable } from '@coreui/react'
-import { exportExcel } from '../../utils/func'
+import { exportExcel } from '../../helpers/func'
 
 const RapportSpecLub = () => {
   const [date, setDate] = useState(new Date().getFullYear())
