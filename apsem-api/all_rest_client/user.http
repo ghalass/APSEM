@@ -1,0 +1,32 @@
+@baseUrl=http://localhost:4000
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWlicDZtYWUwMDAxYm80YzhiZ21nbnZlIiwibmFtZSI6ImdoYWxhc3MiLCJlbWFpbCI6ImdoYWxhc3NAZ21haWwuY29tIiwicm9sZXMiOlt7ImlkIjoiY21pYnA2bWE5MDAwMGJvNGM1OHY3dmNteiIsIm5hbWUiOiJTdXBlciBBZG1pbiIsImNyZWF0ZWRBdCI6IjIwMjUtMTEtMjNUMTI6NDg6NDUuNTM0WiIsInVwZGF0ZWRBdCI6IjIwMjUtMTEtMjNUMTI6MzE6NTkuMzE0WiJ9XSwiaWF0IjoxNzYzOTg4Njk4LCJleHAiOjE3NjQwMTM4OTh9.33nsZegMwyf9mZ6uu2AAGCRphHZEbvlrjHdUNqvV6Ds
+
+
+GET {{baseUrl}}/user/users
+Cookie: jwt={{token}}
+
+### CREATE SUPER ADMIN
+GET {{baseUrl}}/user/create_super_admin
+
+### LOGIN
+POST {{baseUrl}}/user/login
+Content-Type: application/json
+
+{
+    "email":"ghalass@gmail.com",
+    "password":"123456"
+}
+
+### GET_LOGGED_USER
+GET {{baseUrl}}/user/checktoken
+Cookie: jwt={{token}}
+
+### CREATE USER
+POST {{baseUrl}}/user/signup
+Content-Type: application/json
+
+{
+    "name":"user_for_test",
+    "email":"user_for_test@email.com",
+    "password":"123456"
+}

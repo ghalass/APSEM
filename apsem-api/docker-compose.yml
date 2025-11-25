@@ -1,0 +1,17 @@
+services:
+  # 🗄️ PostgreSQL Database
+  db:
+    image: postgres:14.19-alpine3.21
+    container_name: apsem_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: apsem_db
+      POSTGRES_USER: apsem_db_user
+      POSTGRES_PASSWORD: password_user
+    ports:
+      - "5433:5432"   # ← CORRECTION IMPORTANTE
+    volumes:
+      - apsem_db:/var/lib/postgresql/data
+
+volumes:
+  apsem_db:
