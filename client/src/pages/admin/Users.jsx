@@ -29,7 +29,6 @@ import {
 } from '../../hooks/useUsers'
 import { useQuery } from '@tanstack/react-query'
 import { cilPenNib, cilTrash } from '@coreui/icons'
-import { USER_TYPE } from '../../utils/types'
 import TableHead from '../configs/TableHead'
 import { fecthRolesQuery } from '../../hooks/useRoles'
 import AdminLayout from '../../layout/AdminLayout'
@@ -59,9 +58,9 @@ const Users = () => {
       active: entity.active,
     }
 
-    console.log(data)
+    // console.log(data)
 
-    return
+    // return
     switch (operation) {
       case 'create':
         createMutation.mutate(data, {
@@ -219,21 +218,47 @@ const Users = () => {
                       {item?.roles.map((role) => (
                         <div key={role.id}>
                           {role?.permissions?.length > 0 ? (
-                            <>
-                              {role?.permissions?.map((perm) => (
-                                <CBadge key={perm.id} color="success" className="me-1">
-                                  {perm.resource} {perm.action}
-                                </CBadge>
+                            <div className="d-flex flex-wrap gap-1">
+                              {Object.entries(
+                                role.permissions.reduce((acc, perm) => {
+                                  if (!acc[perm.resource]) {
+                                    acc[perm.resource] = new Set()
+                                  }
+                                  if (perm.action) {
+                                    acc[perm.resource].add(perm.action)
+                                  }
+                                  return acc
+                                }, {}),
+                              ).map(([resource, actionsSet]) => (
+                                <div
+                                  key={resource}
+                                  className="border rounded border-primary-subtle p-1"
+                                >
+                                  <small className="fw-bold">{resource}</small>
+                                  <div>
+                                    {Array.from(actionsSet).map((action) => (
+                                      <CBadge
+                                        key={`${resource}-${action}`}
+                                        color="success"
+                                        className="me-1"
+                                      >
+                                        {action}
+                                      </CBadge>
+                                    ))}
+                                  </div>
+                                </div>
                               ))}
-                            </>
+                            </div>
                           ) : (
-                            ''
+                            <span className="text-muted">Aucune permission</span>
                           )}
                         </div>
                       ))}
                     </>
                   ) : (
-                    ''
+                    <CBadge color="danger" className="me-1">
+                      Pas de rôle
+                    </CBadge>
                   )}
                 </CTableDataCell>
                 <CTableDataCell>
@@ -268,63 +293,9 @@ const Users = () => {
         </CModalHeader>
         <CModalBody>
           <div className="row">
-            {/* <div className="col-8">
-              <CFormSelect
-                id="floatingSelect"
-                floatingClassName="mb-3"
-                floatingLabel="Choisir un rôle"
-                aria-label="Floating label select example"
-                value={entity?.role}
-                onChange={(e) => setEntity({ ...entity, role: e.target.value })}
-                disabled={
-                  createMutation.isPending ||
-                  updateMutation.isPending ||
-                  deleteMutation.isPending ||
-                  operation === 'delete'
-                }
-              >
-                <option value={''}></option>
-                {getAllRolesQuery?.data?.map((u_type, index) => (
-                  <option key={index} value={u_type.name}>
-                    {u_type.name}
-                  </option>
-                ))}
-              </CFormSelect>
-            </div> */}
             <div className="col">
-              {/* <CFormCheck
-                type="radio"
-                name="inlineRadioOptions"
-                id="inlineCheckbox1"
-                value="option1"
-                label="Active"
-                checked={entity?.active}
-                onChange={(e) => setEntity({ ...entity, active: true })}
-                disabled={
-                  createMutation.isPending ||
-                  updateMutation.isPending ||
-                  deleteMutation.isPending ||
-                  operation === 'delete'
-                }
-              />
-              <CFormCheck
-                type="radio"
-                name="inlineRadioOptions"
-                id="inlineCheckbox2"
-                value="option2"
-                label="InActive"
-                checked={!entity?.active}
-                onChange={(e) => setEntity({ ...entity, active: false })}
-                disabled={
-                  createMutation.isPending ||
-                  updateMutation.isPending ||
-                  deleteMutation.isPending ||
-                  operation === 'delete'
-                }
-              /> */}
-
               <CFormSwitch
-                size="xl"
+                size="lg"
                 label="Active"
                 id="formSwitchCheckDefaultXL"
                 checked={entity?.active}
@@ -338,39 +309,7 @@ const Users = () => {
               />
             </div>
           </div>
-          {/* <div className="row">{JSON.stringify(entity?.roles)}</div> */}
 
-          <div className="d-flex gap-1 my-2">
-            {getAllRolesQuery?.data &&
-              getAllRolesQuery?.data.length > 0 &&
-              getAllRolesQuery?.data.map((r) => {
-                const check = entity?.roles?.some((role) => role.id === r.id)
-                return (
-                  <CBadge
-                    key={r.id}
-                    textBgColor="light"
-                    className={`border ${check && 'bg-primary-subtle'}`}
-                  >
-                    {r.name}{' '}
-                    {check && (
-                      <span className="rounded rounded-circle border-primary text-danger">
-                        <i className="bi bi-trash"></i>
-                      </span>
-                    )}
-                  </CBadge>
-                )
-              })}
-          </div>
-
-          <div className="d-flex gap-1 mb-2">
-            {entity?.roles &&
-              entity?.roles.length > 0 &&
-              entity?.roles.map((r) => (
-                <CBadge key={r.id} textBgColor="light" className="border">
-                  {r.name}
-                </CBadge>
-              ))}
-          </div>
           <div className="d-flex gap-1 mb-2">
             {/* {JSON.stringify(entity?.roles)} */}
             {getAllRolesQuery?.data?.map((r, index) => (
@@ -435,7 +374,7 @@ const Users = () => {
             floatingClassName="mb-3"
             floatingLabel="Mode de passe de l'utilisateur"
             placeholder="password"
-            value={entity.password}
+            value={entity.password || ''}
             onChange={(e) => setEntity({ ...entity, password: e.target.value })}
             disabled={
               createMutation.isPending ||

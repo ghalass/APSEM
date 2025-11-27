@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   CAlert,
   CButton,
@@ -19,12 +19,13 @@ import { cilLockLocked, cilUser } from '@coreui/icons'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { loginQuery } from '../../hooks/useUsers'
 import { useAuth } from '../../context/Auth'
+import ThemeToggle from '../../components/ThemeToggle'
 
 const Login = () => {
   const loginMutation = loginQuery()
 
   const [user, setUser] = useState({
-    email: 'user_for_test@gmail.com',
+    email: 'ghalass@gmail.com',
     password: '123456',
     // email: "ghalass@gmail.com",
     // password: "gh@l@ss@dmin",
@@ -55,6 +56,7 @@ const Login = () => {
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
+        <ThemeToggle />
         <CRow className="justify-content-center">
           <CCol md={8}>
             <CCardGroup>

@@ -1,4 +1,4 @@
-// utilis/apiPaths.js
+// src/helpers/apiPaths.js
 export const API_PATHS = {
   AUTH: {
     LOGIN: '/user/login',
@@ -15,6 +15,8 @@ export const API_PATHS = {
     ADD_ROLE: '/roles',
     UPDATE_ROLE: (roleId) => `/roles/${roleId}`,
     DELETE_ROLE: (roleId) => `/roles/${roleId}`,
+    ASSIGN_PERMISSION_TO_ROLE: `/assign/permission-to-role`,
+    DELETE_RELATION_PERMISSION_TO_ROLE: `/assign/delete-relation-permission-to-role`,
   },
   PERMISSIONS: {
     GET_ALL_PERMISSIONS: '/permissions',

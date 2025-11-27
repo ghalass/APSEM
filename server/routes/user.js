@@ -56,8 +56,8 @@ router.get("/users", authMiddleware, getUsers);
 // UPDATE AN USER
 router.patch(
   "/updateUser",
-  authMiddleware,
-  allowedRoles(["SUPER_ADMIN", "ADMIN"]),
+  // authMiddleware,
+  // allowedRoles(["SUPER_ADMIN", "ADMIN"]),
   updateUser
 );
 

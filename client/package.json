@@ -1,5 +1,6 @@
 {
   "name": "coreui-free-react-admin-template",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "homepage": ".",

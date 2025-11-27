@@ -1,188 +1,235 @@
-import React from 'react'
-import { fecthRolesQuery } from '../../hooks/useRoles'
+import { useState } from 'react'
+import {
+  fecthRolesQuery,
+  useAssignPermissionToRole,
+  useDeleteRelationPermissionToRole,
+} from '../../hooks/useRoles'
 import { useQuery } from '@tanstack/react-query'
 import {
+  CAlert,
   CBadge,
   CButton,
   CCard,
   CCardBody,
-  CCardLink,
   CCardSubtitle,
-  CCardText,
   CCardTitle,
-  CCol,
-  CRow,
+  CFormSelect,
+  CModal,
+  CModalBody,
+  CModalFooter,
+  CModalHeader,
+  CModalTitle,
   CSpinner,
 } from '@coreui/react'
-import { cilCloudDownload, cilPlus } from '@coreui/icons'
-import { exportExcel } from '../../helpers/func'
+import { cilPlus, cilTrash } from '@coreui/icons'
 import AdminLayout from '../../layout/AdminLayout'
 import CIcon from '@coreui/icons-react'
+import { fecthPermissionsQuery } from '../../hooks/usePermissions'
 
 export default function Roles() {
-  const getAllQuery = useQuery(fecthRolesQuery())
-  const addPermission = (roleId) => {
-    alert(JSON.stringify(roleId))
+  const getAllRolesQuery = useQuery(fecthRolesQuery())
+  const getAllPermissionsQuery = useQuery(fecthPermissionsQuery())
+
+  // ASSIGN PERMISSION TO ROLE
+  const [showAddPermissionModal, setShowAddPermissionModal] = useState(false)
+  const assignPermissionToRoleMutation = useAssignPermissionToRole()
+  const [attibuerPermissionToRole, setAttibuerPermissionToRole] = useState({
+    role: {},
+    permissionId: '',
+  })
+  const attribuerPermissionRole = (role) => {
+    setAttibuerPermissionToRole({ ...attibuerPermissionToRole, role: role })
+    setShowAddPermissionModal(!showAddPermissionModal)
+  }
+  const submitAttribuerPermissionRole = () => {
+    const data = {
+      roleId: attibuerPermissionToRole.role.id,
+      permissionId: attibuerPermissionToRole.permissionId,
+    }
+    assignPermissionToRoleMutation.mutate(data, {
+      onSuccess: () => {
+        setShowAddPermissionModal(false)
+      },
+    })
+  }
+
+  // DELETE PERMISSION
+  const [showDeletePermissionModal, setShowDeletePermissionModal] = useState(false)
+  const deletePermissionToRoleMutation = useDeleteRelationPermissionToRole()
+  const [deletePermissionToRole, setDeletePermissionToRole] = useState({
+    permission: {},
+    role: {},
+  })
+  const deletePermission = (perm, role) => {
+    setDeletePermissionToRole({ permission: perm, role: role })
+    setShowDeletePermissionModal(!showDeletePermissionModal)
+  }
+  const submitDeletePermissionRole = () => {
+    const data = {
+      roleId: deletePermissionToRole.role.id,
+      permissionId: deletePermissionToRole.permission?.id,
+    }
+    deletePermissionToRoleMutation.mutate(data, {
+      onSuccess: () => {
+        setShowDeletePermissionModal(false)
+      },
+    })
   }
 
   const createNewRole = () => {
     alert(JSON.stringify('new role'))
   }
+
   return (
     <AdminLayout>
-      <div className="">
-        <div className="d-flex align-items-center justify-content-between gap-1 text-uppercase">
-          <div className="d-flex align-items-center gap-2">
-            Liste des rôles
-            <div>
-              <CBadge textBgColor="primary"> {getAllQuery.data?.length || 0}</CBadge>
-            </div>
-            <div>
-              {(getAllQuery.isLoading || getAllQuery.isPending || getAllQuery.isRefetching) && (
-                <CSpinner color="primary" size="sm" />
-              )}
-            </div>
-          </div>
-          <CButton
-            onClick={createNewRole}
-            size="sm"
-            color="primary"
-            variant="outline"
-            className="rounded-pill"
-          >
-            <CIcon size="sm" icon={cilPlus} />
-          </CButton>
-        </div>
-
-        <div className="row">
-          <div className="col-sm col-md-2 text-center text-sm-start mb-2">
-            {/* <CButton
-                  size="sm"
-                  color="success"
-                  variant="outline"
-                  onClick={() => exportExcel(tableId, excelFileName)}
-                  className="rounded-pill"
-                  disabled={!!currentEntitys?.length !== true}
-                >
-                  Excel <CIcon icon={cilCloudDownload} />
-                </CButton> */}
-          </div>
-
-          <div className="col-sm col-md-10 mb-2">
-            <div className="d-flex gap-2 justify-content-end">
-              <div style={{ width: '50px' }}>
-                {/* <select
-                      className="form-control form-control-sm"
-                      defaultValue={entitysPerPage}
-                      onChange={(e) => {
-                        setEntitysPerPage(e.target.value)
-                        setCurrentPage(1)
-                      }}
-                    >
-                      {getMultiplesOf(filteredEntitys?.length, 5)?.map((item, i) => (
-                        <option key={i} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select> */}
-              </div>
-              <div className="">
-                {/* <CPagination size="sm" aria-label="Page navigation example" className="mb-0">
-                      <CPaginationItem
-                        aria-label="Previous"
-                        disabled={currentPage === 1}
-                        onClick={() => handlePageChange(currentPage - 1)}
-                      >
-                        <span aria-hidden="true">&laquo;</span>
-                      </CPaginationItem>
-      
-                      {Array.from({ length: totalPages }, (_, index) => (
-                        <CPaginationItem
-                          key={index}
-                          active={index + 1 === currentPage}
-                          size="sm"
-                          onClick={() => handlePageChange(index + 1)}
-                        >
-                          {index + 1}
-                        </CPaginationItem>
-                      ))}
-      
-                      <CPaginationItem
-                        aria-label="Next"
-                        disabled={currentPage === totalPages}
-                        onClick={() => handlePageChange(currentPage + 1)}
-                      >
-                        <span aria-hidden="true">&raquo;</span>
-                      </CPaginationItem>
-                    </CPagination> */}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <CRow
-        xs={{ cols: 1, gutter: 2 }}
-        md={{ cols: 2 }}
-        lg={{ cols: 3 }}
-        xl={{ cols: 4 }}
-        className="g-2 align-items-start"
+      {/* ADD_PERMISSION_MODAL */}
+      <CModal
+        backdrop="static"
+        visible={showAddPermissionModal}
+        onClose={() => setShowAddPermissionModal(false)}
+        aria-labelledby="LiveDemoExampleLabel"
       >
-        {getAllQuery.data?.length > 0 ? (
-          getAllQuery.data?.map((role) => (
-            <CCol key={role.id}>
-              <CCard>
-                <CCardBody className="p-3">
-                  {/* Padding réduit et uniforme */}
-                  <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
-                    <div className="d-flex align-items-center gap-2">
-                      <strong className="small">Rôle:</strong>
-                      <CBadge textBgColor="primary" className="border small">
-                        {role.name}
-                      </CBadge>
-                    </div>
-                    <div>
-                      <CButton
-                        onClick={() => addPermission(role.id)}
-                        size="sm"
-                        color="light"
-                        variant="outline"
-                        className="rounded-pill"
-                      >
-                        <CIcon size="sm" icon={cilPlus} />
-                      </CButton>
-                    </div>
-                  </div>
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <small className="text-body-secondary">Ressource</small>
-                    <small className="text-body-secondary">Action</small>
-                  </div>
-                  {role?.permissions?.length > 0 ? (
-                    role.permissions.map((perm) => (
-                      <div
-                        key={perm.id}
-                        className="d-flex justify-content-between align-items-center mb-1"
-                      >
-                        <span className="small text-truncate pe-2" style={{ maxWidth: '60%' }}>
-                          {perm.resource}
-                        </span>
-                        <CBadge textBgColor="light" className="border small">
-                          {perm.action}
-                        </CBadge>
+        <CModalHeader>
+          <CModalTitle id="LiveDemoExampleLabel">Attribuer une permission à un rôle</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <h6 className="text-center">Rôle : {attibuerPermissionToRole?.role?.name}</h6>
+          <div className="mt-2">
+            <CFormSelect
+              id="floatingSelect"
+              floatingClassName="mb-3"
+              floatingLabel="Choisir un rôle"
+              aria-label="Floating label select example"
+              value={attibuerPermissionToRole.permissionId}
+              onChange={(e) =>
+                setAttibuerPermissionToRole({
+                  ...attibuerPermissionToRole,
+                  permissionId: e.target.value,
+                })
+              }
+              disabled={assignPermissionToRoleMutation.isPending}
+            >
+              <option value={''}></option>
+              {getAllPermissionsQuery?.data?.map((perm, index) => (
+                <option key={index} value={perm.id}>
+                  {perm.action} {perm.resource}
+                </option>
+              ))}
+            </CFormSelect>
+            {assignPermissionToRoleMutation.isError && (
+              <CAlert color="danger">{assignPermissionToRoleMutation.error.message}</CAlert>
+            )}
+          </div>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setShowAddPermissionModal(false)}>
+            Close
+          </CButton>
+          <CButton onClick={submitAttribuerPermissionRole} color="primary">
+            Save
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* DELETE_PERMISSION_MODAL */}
+      <CModal
+        backdrop="static"
+        visible={showDeletePermissionModal}
+        onClose={() => setShowDeletePermissionModal(false)}
+        aria-labelledby="LiveDemoExampleLabel"
+      >
+        <CModalHeader>
+          <CModalTitle id="LiveDemoExampleLabel">Supprimer une permission</CModalTitle>
+        </CModalHeader>
+        <CModalBody className="text-center">
+          <h6>Rôle :{deletePermissionToRole.role.name} </h6>
+          <div className="mt-2">
+            Voulez-vous vraiment suppimer cette permission ?
+            <div className="d-flex justify-content-center gap-2 border mt-2 rounded-pill align-items-center py-2">
+              <span>{deletePermissionToRole.permission.resource}</span>
+              <span>{deletePermissionToRole.permission.action}</span>
+            </div>
+          </div>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setShowDeletePermissionModal(false)}>
+            Close
+          </CButton>
+          <CButton onClick={submitDeletePermissionRole} color="danger">
+            Save
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/*  */}
+      <div className="d-flex align-items-center justify-content-between gap-1 text-uppercase mb-2">
+        <div className="d-flex align-items-center gap-2">
+          Liste des rôles
+          <div>
+            <CBadge textBgColor="primary"> {getAllRolesQuery.data?.length || 0}</CBadge>
+          </div>
+          <div>
+            {(getAllRolesQuery.isLoading ||
+              getAllRolesQuery.isPending ||
+              getAllRolesQuery.isRefetching) && <CSpinner color="primary" size="sm" />}
+          </div>
+        </div>
+        <CButton
+          onClick={createNewRole}
+          size="sm"
+          color="primary"
+          variant="outline"
+          className="rounded-pill"
+        >
+          <CIcon size="sm" icon={cilPlus} />
+        </CButton>
+      </div>
+
+      {/*  */}
+      <div className="d-flex flex-wrap gap-2 mb-2">
+        {getAllRolesQuery?.data?.length > 0 &&
+          getAllRolesQuery?.data.map((role, index) => (
+            <CCard style={{ width: '18rem' }} key={index}>
+              <CCardBody>
+                <CCardTitle className="d-flex align-content-center justify-content-between">
+                  {role.name}
+                  <CButton
+                    onClick={() => attribuerPermissionRole(role)}
+                    size="sm"
+                    color="primary"
+                    variant="outline"
+                    className="rounded-pill"
+                  >
+                    <CIcon size="sm" icon={cilPlus} />
+                  </CButton>
+                </CCardTitle>
+                <div className="d-flex justify-content-between">
+                  <CCardSubtitle className="mb-2 text-body-secondary">Resource</CCardSubtitle>
+                  <CCardSubtitle className="mb-2 text-body-secondary">Action</CCardSubtitle>
+                </div>
+                <div>
+                  {role.permissions.map((perm, i) => (
+                    <div
+                      key={i}
+                      className="d-flex justify-content-between rounded-pill border p-1 mb-1"
+                    >
+                      <div className="ms-1">{perm.resource}</div>
+                      <div className="d-flex gap-1 justify-content-end align-content-center">
+                        <div>{perm.action}</div>
+                        <div
+                          onClick={() => deletePermission(perm, role)}
+                          className="btn btn-sm d-flex align-content-end justify-content-center text-danger"
+                        >
+                          <CIcon className="" size="sm" icon={cilTrash} />
+                        </div>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-muted small text-center mb-0 mt-2">Aucune permission</p>
-                  )}
-                </CCardBody>
-              </CCard>
-            </CCol>
-          ))
-        ) : (
-          <CCol xs={12}>
-            <p className="text-center text-muted py-4">Aucun rôle trouvé</p>
-          </CCol>
-        )}
-      </CRow>
+                    </div>
+                  ))}
+                </div>
+              </CCardBody>
+            </CCard>
+          ))}
+      </div>
     </AdminLayout>
   )
 }

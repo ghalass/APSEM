@@ -6,7 +6,9 @@ const checkPermission = require("../middleware/checkPermission");
 const {
   assignRoleToUser,
   assignPermissionRole,
+  deleteRelationPermissionRole,
 } = require("../controllers/assignController");
+require("../../client/src/api/roleApi");
 
 const router = express.Router();
 
@@ -24,6 +26,14 @@ router.post(
   authMiddleware,
   checkPermission("permissions", "ASSIGN"),
   assignPermissionRole
+);
+
+// delete-relation-permission-to-role
+router.post(
+  "/delete-relation-permission-to-role",
+  authMiddleware,
+  checkPermission("permissions", "ASSIGN"),
+  deleteRelationPermissionRole
 );
 
 module.exports = router;

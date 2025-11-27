@@ -13,7 +13,7 @@ const generateToken = (loggedUser) => {
 
 // signup user
 const signupUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, roles } = req.body;
 
   try {
     // validation
@@ -28,7 +28,7 @@ const signupUser = async (req, res) => {
     if (!validator.isLength(password, { min: 6 })) {
       return res
         .status(400)
-        .json({ error: "Password doit être au minimum de 4 caractères!" });
+        .json({ error: "Password doit être au minimum de 6 caractères!" });
     }
 
     const exists = await prisma.user.findFirst({
@@ -42,31 +42,63 @@ const signupUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
 
-    const defaultRole = await prisma.role.findFirst({
-      where: { name: "User" },
-    });
-    let role;
-    if (!defaultRole) {
-      role = await prisma.role.create({
-        data: { name: "User" },
-      });
+    // PRÉPARER LES DONNÉES DE CRÉATION
+    let rolesToConnect = [];
+
+    // SI DES RÔLES SONT FOURNIS DANS LA REQUÊTE
+    if (roles && Array.isArray(roles) && roles.length > 0) {
+      // VÉRIFIER QUE TOUS LES RÔLES EXISTENT
+      const roleIds = roles.map((role) => role.id).filter((id) => id);
+
+      if (roleIds.length > 0) {
+        const existingRoles = await prisma.role.findMany({
+          where: {
+            id: { in: roleIds },
+          },
+        });
+
+        // S'ASSURER QUE TOUS LES RÔLES DEMANDÉS EXISTENT
+        if (existingRoles.length === roleIds.length) {
+          rolesToConnect = roleIds.map((id) => ({ id }));
+        } else {
+          return res
+            .status(400)
+            .json({ error: "Un ou plusieurs rôles n'existent pas" });
+        }
+      }
     } else {
-      role = defaultRole;
+      // RÔLE PAR DÉFAUT "User" SI AUCUN RÔLE N'EST FOURNI
+      const defaultRole = await prisma.role.findFirst({
+        where: { name: "User" },
+      });
+
+      let role;
+      if (!defaultRole) {
+        role = await prisma.role.create({
+          data: { name: "User" },
+        });
+      } else {
+        role = defaultRole;
+      }
+      rolesToConnect = [{ id: role.id }];
     }
 
+    // CRÉATION DE L'UTILISATEUR
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashPassword,
         roles: {
-          connect: {
-            id: role.id,
-          },
+          connect: rolesToConnect,
         },
       },
       include: {
-        roles: true,
+        roles: {
+          include: {
+            permissions: true,
+          },
+        },
       },
     });
 
@@ -77,6 +109,7 @@ const signupUser = async (req, res) => {
       email: user?.email,
       roles: user?.roles,
     };
+
     // GENERATE TOKEN
     const token = generateToken(createdUser);
 
@@ -84,7 +117,6 @@ const signupUser = async (req, res) => {
     res.status(200).json({ user: createdUser, token });
   } catch (error) {
     console.log(error);
-
     res.status(400).json({ error: error.message });
   }
 };
@@ -143,8 +175,6 @@ const loginUser = async (req, res) => {
       maxAge: tokenExpireIn * 60 * 60 * 1000, // tokenExpireIn * 60 * 60 * 1000 ==> hours
     });
 
-    await setLastViste(email);
-
     // SEND USER AND TOKEN
     res.status(200).json({ user: loggedUser, token });
   } catch (error) {
@@ -160,19 +190,6 @@ const logoutUser = async (req, res) => {
     res.status(200).json(cookies);
   } catch (error) {
     res.status(400).json({ error: error.message });
-  }
-};
-
-//
-const setLastViste = async (email) => {
-  try {
-    await prisma.user.update({
-      where: { email: email },
-      data: { lastVisite: new Date().toISOString() },
-      omit: { password: true },
-    });
-  } catch (error) {
-    return error.message;
   }
 };
 
@@ -278,50 +295,112 @@ const getUsers = async (req, res) => {
 };
 
 // update a user
+// update a user
 const updateUser = async (req, res) => {
   try {
     const { id } = req.body;
 
     // CHECK IF USER ID IS PROVIDED
-    if (!req?.body?.id)
-      return res.status(404).json({ error: "YOU MUST PROVID THE USER ID" });
-
-    // FIND & CHECK IF USER TO UPDATE IS EXIST
-    const selectedUSER = await prisma.user.findFirst({ where: { id: id } });
-    if (!selectedUSER) return res.status(404).json({ error: "USER NOT FOUND" });
-
-    // CHECK IF EMAIL IS NOT ALREADY USED BY AN OTHER USER
-    if (
-      req?.body?.email &&
-      (await prisma.user.findFirst({
-        where: { email: req?.body?.email, id: { not: parseInt(id) } },
-      }))
-    )
-      return res
-        .status(401)
-        .json({ error: "CET EMAIL D'UTILISATEUR EST DÉJÀ UTILISÉ!" });
-
-    delete req.body?.id; // remove id from req.body
-
-    if (req.body.password !== "") {
-      const salt = await bcrypt.genSalt(10);
-      const hash = await bcrypt.hash(req.body.password, salt);
-      req.body.password = hash;
-    } else {
-      delete req.body.password;
+    if (!id) {
+      return res.status(400).json({ error: "YOU MUST PROVIDE THE USER ID" });
     }
 
-    // UPDATE THE USER
+    // FIND & CHECK IF USER TO UPDATE EXISTS
+    const selectedUSER = await prisma.user.findFirst({
+      where: { id: id },
+    });
+    if (!selectedUSER) {
+      return res.status(404).json({ error: "USER NOT FOUND" });
+    }
+
+    // CHECK IF EMAIL IS NOT ALREADY USED BY ANOTHER USER
+    if (req.body?.email) {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          email: req.body.email,
+          id: { not: id },
+        },
+      });
+      if (existingUser) {
+        return res.status(409).json({ error: "CET EMAIL EST DÉJÀ UTILISÉ!" });
+      }
+    }
+
+    // PRÉPARER LES DONNÉES DE MISE À JOUR
+    const updateData = { ...req.body };
+
+    // Supprimer l'id des données de mise à jour
+    delete updateData.id;
+
+    // Gérer le mot de passe
+    if (updateData.password && updateData.password !== "") {
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(updateData.password, salt);
+      updateData.password = hash;
+    } else {
+      delete updateData.password;
+    }
+
+    // Supprimer les rôles des données de mise à jour
+    const { roles, ...bodyWithoutRoles } = updateData;
+
+    // GESTION DES RÔLES
+    if (roles && Array.isArray(roles)) {
+      try {
+        // Utiliser une transaction pour garantir l'intégrité des données
+        await prisma.$transaction(async (tx) => {
+          // 1. DÉSASSOCIER TOUS LES RÔLES EXISTANTS
+          await tx.user.update({
+            where: { id: id },
+            data: {
+              roles: {
+                set: [], // Déconnecte tous les rôles existants
+              },
+            },
+          });
+
+          // 2. ASSOCIER LES NOUVEAUX RÔLES
+          if (roles.length > 0) {
+            // Extraire les IDs des rôles
+            const roleIds = roles.map((role) => role.id).filter((id) => id);
+
+            if (roleIds.length > 0) {
+              await tx.user.update({
+                where: { id: id },
+                data: {
+                  roles: {
+                    connect: roleIds.map((id) => ({ id })),
+                  },
+                },
+              });
+            }
+          }
+        });
+      } catch (roleError) {
+        console.error("Error managing roles:", roleError);
+        return res
+          .status(400)
+          .json({ error: "Erreur lors de la mise à jour des rôles" });
+      }
+    }
+
+    // UPDATE THE USER (les autres données)
     const updatedUser = await prisma.user.update({
-      where: { id: parseInt(id) },
-      data: req.body,
+      where: { id: id },
+      data: bodyWithoutRoles,
+      omit: { password: true },
+      include: {
+        roles: {
+          include: {
+            permissions: true,
+          },
+        },
+      },
     });
 
-    // REMOVE PASSWORD BEFORE SEND USER
-    const { password, ...updatedUserWithOutPassword } = updatedUser;
-
-    res.status(200).json(updatedUserWithOutPassword);
+    res.status(200).json(updatedUser);
   } catch (error) {
+    console.error("Update user error:", error);
     res.status(400).json({ error: error.message });
   }
 };
@@ -406,14 +485,14 @@ const deleteUser = async (req, res) => {
     const { id } = req.params;
     console.log(id);
 
-    if (isNaN(id) || parseInt(id) != id) {
+    if (isNaN(id) || id != id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
     }
 
     const user = await prisma.user.findFirst({
-      where: { id: parseInt(id) },
+      where: { id: id },
     });
 
     if (!user) {
@@ -421,7 +500,7 @@ const deleteUser = async (req, res) => {
     }
 
     await prisma.user.delete({
-      where: { id: parseInt(id) },
+      where: { id: id },
     });
 
     res.status(200).json(user);

@@ -89,7 +89,7 @@ const assignPermissionRole = async (req, res) => {
         .json({ error: "Permission n'existe pas" });
 
     // check if permission already assigned
-    console.log(role);
+    // console.log(role);
 
     const hasPermission = role.permissions.some((p) => p.id === permissionId);
     if (hasPermission)
@@ -108,7 +108,29 @@ const assignPermissionRole = async (req, res) => {
   }
 };
 
+const deleteRelationPermissionRole = async (req, res) => {
+  try {
+    const { roleId, permissionId } = req.body;
+
+    // Pour supprimer une permission spécifique d'un rôle
+    await prisma.role.update({
+      where: { id: roleId },
+      data: {
+        permissions: {
+          disconnect: { id: permissionId },
+        },
+      },
+    });
+    res
+      .status(HttpStatus.OK)
+      .json({ message: "Permission supprimé avec succès" });
+  } catch (error) {
+    res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
+  }
+};
+
 module.exports = {
   assignRoleToUser,
   assignPermissionRole,
+  deleteRelationPermissionRole,
 };

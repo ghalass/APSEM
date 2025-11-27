@@ -8,7 +8,6 @@ export default function AdminLayout({ children }) {
     { to: '/admin', label: 'Admin', icon: cilBadge, end: true },
     { to: '/admin/roles', label: 'Rôles' },
     { to: '/admin/permissions', label: 'Permissions', icon: cilBadge },
-    { to: '/admin/resources', label: 'Resources', icon: cilBadge },
     { to: '/admin/users', label: 'Utilisateurs', icon: cilBadge },
   ]
 

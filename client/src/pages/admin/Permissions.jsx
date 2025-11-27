@@ -21,33 +21,36 @@ export default function Permissions() {
 
   return (
     <AdminLayout>
-      {/* {JSON.stringify(getAllPermissionsQuery.data)} */}
-      {/* {JSON.stringify(getAllResourcesQuery.data)} */}
-      <CRow xs={{ cols: 1, gutter: 2 }} md={{ cols: 3, gutter: 2 }}>
+      <div className="d-flex flex-wrap gap-2">
         {getAllResourcesQuery.data?.length > 0 ? (
           getAllResourcesQuery.data?.map((resource) => (
-            <CCol key={resource}>
+            <div key={resource}>
               <CCard key={resource.id}>
                 <CCardBody>
                   <CCardTitle>{resource.name}</CCardTitle>
-                  <CCardSubtitle className="mb-2 text-body-secondary">{resource}</CCardSubtitle>
-                  {getAllPermissionsQuery?.data?.length > 0 &&
-                    getAllPermissionsQuery.data.map(
-                      (p) =>
-                        p.resource === resource && (
-                          <CBadge key={p.id} textBgColor="light" className="border me-1 mb-1">
-                            {p.action}
-                          </CBadge>
-                        ),
-                    )}
+                  <CCardSubtitle className="mb-2 text-body-secondary">
+                    Resource : {resource}
+                  </CCardSubtitle>
+                  <p>Actions : </p>
+                  <div className="d-flex flex-wrap gap-1">
+                    {getAllPermissionsQuery?.data?.length > 0 &&
+                      getAllPermissionsQuery.data.map(
+                        (p) =>
+                          p.resource === resource && (
+                            <CBadge key={p.id} textBgColor="light" className="border me-1 mb-1">
+                              {p.action}
+                            </CBadge>
+                          ),
+                      )}
+                  </div>
                 </CCardBody>
               </CCard>
-            </CCol>
+            </div>
           ))
         ) : (
           <p>Aucun rôle trouvé</p>
         )}
-      </CRow>
+      </div>
     </AdminLayout>
   )
 }

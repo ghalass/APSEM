@@ -41,7 +41,6 @@ const Objectifs = React.lazy(() => import('./pages/configs/Objectifs'))
 
 const Admin = React.lazy(() => import('./pages/admin/Admin'))
 const Permissions = React.lazy(() => import('./pages/admin/Permissions'))
-const Resources = React.lazy(() => import('./pages/admin/Resources'))
 const Roles = React.lazy(() => import('./pages/admin/Roles'))
 const Users = React.lazy(() => import('./pages/admin/Users'))
 
@@ -64,7 +63,6 @@ const routes = [
 
   { path: '/admin', name: 'admin', element: Admin },
   { path: '/admin/roles', name: 'roles', element: Roles },
-  { path: '/admin/resources', name: 'resources', element: Resources },
   { path: '/admin/permissions', name: 'permissions', element: Permissions },
   { path: '/admin/users', name: 'users', element: Users },
 

@@ -11,7 +11,7 @@ Content-Type: application/json
     "roleId":"cmibp9hm70000bok8b160umju"
 }
 
-### ASSIGN ROLE TO USER
+### ASSIGN PERMISSION TO ROLE
 POST {{baseUrl}}/assign/permission-to-role
 Cookie: jwt={{token}}
 Content-Type: application/json
