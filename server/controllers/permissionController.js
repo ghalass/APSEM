@@ -36,11 +36,12 @@ const getPermission = async (req, res) => {
 // create new permission
 const createPermission = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { resource, action } = req.body;
 
     let emptyFields = [];
 
-    if (!name) emptyFields.push("name");
+    if (!resource) emptyFields.push("resource");
+    if (!action) emptyFields.push("action");
 
     if (emptyFields.length > 0) {
       return res
@@ -50,18 +51,18 @@ const createPermission = async (req, res) => {
 
     // check if permission exist
     const existingPermission = await prisma.permission.findFirst({
-      where: { name },
+      where: { resource, action },
     });
 
     if (existingPermission) {
       return res
         .status(HttpStatus.CONFLICT)
-        .json({ error: "Permission déjà utilisé" });
+        .json({ error: "Permission existe déjà" });
     }
 
     // create permission
     const permission = await prisma.permission.create({
-      data: { name },
+      data: { resource, action },
     });
     res.status(HttpStatus.CREATED).json(permission);
   } catch (error) {

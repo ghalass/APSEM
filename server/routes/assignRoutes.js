@@ -8,7 +8,6 @@ const {
   assignPermissionRole,
   deleteRelationPermissionRole,
 } = require("../controllers/assignController");
-require("../../client/src/api/roleApi");
 
 const router = express.Router();
 

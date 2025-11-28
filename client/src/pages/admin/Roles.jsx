@@ -2,7 +2,9 @@ import { useState } from 'react'
 import {
   fecthRolesQuery,
   useAssignPermissionToRole,
+  useCreateRole,
   useDeleteRelationPermissionToRole,
+  useDeleteRole,
 } from '../../hooks/useRoles'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -13,6 +15,7 @@ import {
   CCardBody,
   CCardSubtitle,
   CCardTitle,
+  CFormInput,
   CFormSelect,
   CModal,
   CModalBody,
@@ -76,18 +79,54 @@ export default function Roles() {
     })
   }
 
+  // CREATE ROLE
+  const [showCreateRoleModal, setShowCreateRoleModal] = useState(false)
+  const createRoleMutation = useCreateRole()
+  const [roleName, setRoleName] = useState('')
   const createNewRole = () => {
-    alert(JSON.stringify('new role'))
+    setShowCreateRoleModal(!showCreateRoleModal)
+  }
+  const submitCreateRole = () => {
+    const data = {
+      name: roleName,
+    }
+    createRoleMutation.mutate(data, {
+      onSuccess: () => {
+        setShowCreateRoleModal(false)
+      },
+    })
+  }
+
+  // DELETE ROLE
+  const [showDeleteRoleModal, setShowDeleteRoleModal] = useState(false)
+  const deleteRoleMutation = useDeleteRole()
+  const [roleToDelete, setRoleToDelete] = useState({})
+  const deleteRole = (role) => {
+    setRoleToDelete(role)
+    setShowDeleteRoleModal(!showDeleteRoleModal)
+  }
+  const submitDeleteRoleRole = () => {
+    const data = {
+      id: roleToDelete.id,
+      name: roleToDelete.name,
+    }
+    // alert(JSON.stringify(data))
+    deleteRoleMutation.mutate(data, {
+      onSuccess: () => {
+        setShowDeleteRoleModal(false)
+      },
+    })
   }
 
   return (
     <AdminLayout>
-      {/* ADD_PERMISSION_MODAL */}
+      {/* ASSIGN_PERMISSION_TO_ROLE_MODAL */}
       <CModal
         backdrop="static"
         visible={showAddPermissionModal}
         onClose={() => setShowAddPermissionModal(false)}
         aria-labelledby="LiveDemoExampleLabel"
+        aria-hidden="false"
       >
         <CModalHeader>
           <CModalTitle id="LiveDemoExampleLabel">Attribuer une permission à un rôle</CModalTitle>
@@ -98,7 +137,7 @@ export default function Roles() {
             <CFormSelect
               id="floatingSelect"
               floatingClassName="mb-3"
-              floatingLabel="Choisir un rôle"
+              floatingLabel="Choisir une permission"
               aria-label="Floating label select example"
               value={attibuerPermissionToRole.permissionId}
               onChange={(e) =>
@@ -123,10 +162,10 @@ export default function Roles() {
         </CModalBody>
         <CModalFooter>
           <CButton color="secondary" onClick={() => setShowAddPermissionModal(false)}>
-            Close
+            Annuler
           </CButton>
           <CButton onClick={submitAttribuerPermissionRole} color="primary">
-            Save
+            Attriburer
           </CButton>
         </CModalFooter>
       </CModal>
@@ -137,6 +176,7 @@ export default function Roles() {
         visible={showDeletePermissionModal}
         onClose={() => setShowDeletePermissionModal(false)}
         aria-labelledby="LiveDemoExampleLabel"
+        aria-hidden="false"
       >
         <CModalHeader>
           <CModalTitle id="LiveDemoExampleLabel">Supprimer une permission</CModalTitle>
@@ -153,10 +193,75 @@ export default function Roles() {
         </CModalBody>
         <CModalFooter>
           <CButton color="secondary" onClick={() => setShowDeletePermissionModal(false)}>
-            Close
+            Annuler
           </CButton>
           <CButton onClick={submitDeletePermissionRole} color="danger">
-            Save
+            Supprimer
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* CREATE_ROLE_MODAL */}
+      <CModal
+        backdrop="static"
+        visible={showCreateRoleModal}
+        onClose={() => setShowCreateRoleModal(false)}
+        aria-labelledby="LiveDemoExampleLabel"
+        aria-hidden="false"
+      >
+        <CModalHeader>
+          <CModalTitle id="LiveDemoExampleLabel">Nouveau rôle</CModalTitle>
+        </CModalHeader>
+        <CModalBody className="text-center">
+          <CFormInput
+            type="text"
+            id="floatingInputname"
+            floatingClassName="mb-3"
+            floatingLabel="Rôle"
+            placeholder="name"
+            value={roleName}
+            onChange={(e) => setRoleName(e.target.value)}
+            disabled={createRoleMutation.isPending}
+          />
+          {createRoleMutation.isError && (
+            <CAlert color="danger">{createRoleMutation.error.message}</CAlert>
+          )}
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setShowCreateRoleModal(false)}>
+            Annuler
+          </CButton>
+          <CButton onClick={submitCreateRole} color="primary">
+            Créer
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* DELETE_ROLE_MODAL */}
+      <CModal
+        backdrop="static"
+        visible={showDeleteRoleModal}
+        onClose={() => setShowDeleteRoleModal(false)}
+        aria-labelledby="LiveDemoExampleLabel"
+        aria-hidden="false"
+      >
+        <CModalHeader>
+          <CModalTitle id="LiveDemoExampleLabel">Supprimer un rôle</CModalTitle>
+        </CModalHeader>
+        <CModalBody className="text-center">
+          <h6>Rôle : {roleToDelete.name} </h6>
+          <div className="mt-2">Voulez-vous vraiment suppimer cette rôle ?</div>
+
+          {deleteRoleMutation.isError && (
+            <CAlert color="danger">{deleteRoleMutation.error.message}</CAlert>
+          )}
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setShowDeleteRoleModal(false)}>
+            Annuler
+          </CButton>
+          <CButton onClick={submitDeleteRoleRole} color="danger">
+            Supprimer
           </CButton>
         </CModalFooter>
       </CModal>
@@ -192,6 +297,12 @@ export default function Roles() {
             <CCard style={{ width: '18rem' }} key={index}>
               <CCardBody>
                 <CCardTitle className="d-flex align-content-center justify-content-between">
+                  <div
+                    onClick={() => deleteRole(role)}
+                    className="btn btn-sm d-flex align-content-end justify-content-center text-danger"
+                  >
+                    <CIcon className="" size="sm" icon={cilTrash} />
+                  </div>
                   {role.name}
                   <CButton
                     onClick={() => attribuerPermissionRole(role)}

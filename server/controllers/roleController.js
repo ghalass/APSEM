@@ -45,12 +45,13 @@ const createRole = async (req, res) => {
     let emptyFields = [];
 
     if (!name) emptyFields.push("name");
-    if (!permissions) emptyFields.push("permissions");
+    // if (!permissions) emptyFields.push("permissions");
 
     if (
-      emptyFields.length > 0 ||
-      !Array.isArray(permissions) ||
-      permissions.length === 0
+      emptyFields.length > 0
+      // ||
+      // !Array.isArray(permissions) ||
+      // permissions.length === 0
     ) {
       return res
         .status(HttpStatus.BAD_REQUEST)
@@ -72,14 +73,14 @@ const createRole = async (req, res) => {
     const role = await prisma.role.create({
       data: {
         name,
-        permissions: {
-          create: permissions.map(({ resource, action }) => ({
-            resource,
-            action,
-          })),
-        },
+        // permissions: {
+        //   create: permissions.map(({ resource, action }) => ({
+        //     resource,
+        //     action,
+        //   })),
+        // },
       },
-      include: { permissions: true },
+      // include: { permissions: true },
     });
     res.status(HttpStatus.CREATED).json(role);
   } catch (error) {
