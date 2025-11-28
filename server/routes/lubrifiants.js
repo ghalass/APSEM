@@ -12,40 +12,75 @@ const {
 } = require("../controllers/lubrifiantController");
 
 const authMiddleware = require("../middleware/authMiddleware");
-const allowedRoles = require("../middleware/allowedRoles");
+// const allowedRoles = require("../middleware/allowedRoles");
+const { ACTION } = require("../helpers/constantes");
+const checkPermission = require("../middleware/checkPermission");
 // const verifyJWT = require('../middleware/verifyJWT')
 
 const router = express.Router();
+const resource = "lubrifiants";
 
 // require auth for all routes bellow
-router.use(authMiddleware);
+// router.use(authMiddleware);
 // router.use(verifyJWT)
 
 // GET all
-router.get("/", getLubrifiants);
+router.get(
+  "/",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getLubrifiants
+);
 
 // GET single workout
-router.get("/:id", getLubrifiants);
+router.get(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getLubrifiants
+);
 
 // POST a new workout
-router.post("/", allowedRoles(["SUPER_ADMIN", "ADMIN"]), createLubrifiant);
+router.post(
+  "/",
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
+  createLubrifiant
+);
 
 // UPDATE a workout
-router.patch("/:id", allowedRoles(["SUPER_ADMIN", "ADMIN"]), updateLubrifiant);
+router.patch(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.UPDATE),
+  updateLubrifiant
+);
 
 // DELETE a workout
-router.delete("/:id", allowedRoles(["SUPER_ADMIN", "ADMIN"]), deleteLubrifiant);
+router.delete(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.DELETE),
+  deleteLubrifiant
+);
 
 router.post(
   "/affectparctolubrifiant",
-  allowedRoles(["SUPER_ADMIN", "ADMIN"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
   addParcToLubrifiant
 );
 router.delete(
   "/affectparctolubrifiant/delete",
-  allowedRoles(["SUPER_ADMIN", "ADMIN"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
   deleteAffectationLubrifiant
 );
-router.get("/affectparctolubrifiant/byparcid/:id", getAllLubrifiantsByParcId);
+router.get(
+  "/affectparctolubrifiant/byparcid/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
+  getAllLubrifiantsByParcId
+);
 
 module.exports = router;

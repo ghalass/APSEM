@@ -49,11 +49,11 @@ const AppHeader = () => {
         </CHeaderNav>
 
         <CHeaderNav>
-          <CNavItem>
+          {/* <CNavItem>
             <CNavLink to="/chat" as={NavLink} className="text-success">
               <CIcon icon={cilChatBubble} size="lg" /> Chat
             </CNavLink>
-          </CNavItem>
+          </CNavItem> */}
 
           <ThemeToggle />
 

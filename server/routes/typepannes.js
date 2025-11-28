@@ -13,37 +13,74 @@ const {
 } = require("../controllers/typepanneController");
 
 const authMiddleware = require("../middleware/authMiddleware");
-const allowedRoles = require("../middleware/allowedRoles");
+// const allowedRoles = require("../middleware/allowedRoles");
+const { ACTION } = require("../helpers/constantes");
+const checkPermission = require("../middleware/checkPermission");
 
 const router = express.Router();
+const resource = "typepannes";
 
 // require auth for all routes bellow
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
-router.get("/", getTypepannes);
+router.get(
+  "/",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getTypepannes
+);
 
 // GET single workout
-router.get("/:id", getTypepanne);
+router.get(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getTypepanne
+);
 
 // POST a new workout
-router.post("/", allowedRoles(["SUPER_ADMIN", "ADMIN"]), createTypepanne);
+router.post(
+  "/",
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
+  createTypepanne
+);
 
 // UPDATE a workout
-router.patch("/:id", allowedRoles(["SUPER_ADMIN", "ADMIN"]), updateTypepanne);
+router.patch(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.UPDATE),
+  updateTypepanne
+);
 
 // DELETE a workout
-router.delete("/:id", allowedRoles(["SUPER_ADMIN", "ADMIN"]), deleteTypepanne);
+router.delete(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.DELETE),
+  deleteTypepanne
+);
 
 router.post(
   "/affectparctotypepanne",
-  allowedRoles(["SUPER_ADMIN", "ADMIN"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
   addParcToTypepanne
 );
+
 router.delete(
   "/affectparctotypepanne/delete",
-  allowedRoles(["SUPER_ADMIN", "ADMIN"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.DELETE),
   deleteAffectationTypepanne
 );
-router.get("/affectparctotypepanne/byparcid/:id", getAllTypepannesByParcId);
+
+router.get(
+  "/affectparctotypepanne/byparcid/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getAllTypepannesByParcId
+);
 
 module.exports = router;

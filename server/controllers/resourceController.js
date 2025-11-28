@@ -8,7 +8,8 @@ const getResources = async (req, res) => {
       FROM information_schema.tables 
       WHERE table_schema = 'public'
       AND table_type = 'BASE TABLE'
-      ORDER BY table_name
+      AND table_name NOT IN ('role', 'permission')
+      ORDER BY table_name ASC
     `;
 
     // Filtrer les tables qui ne commencent pas par "prisma_" ou "_"
@@ -18,6 +19,9 @@ const getResources = async (req, res) => {
         (tableName) =>
           !tableName.startsWith("prisma_") && !tableName.startsWith("_")
       );
+
+    // console.log(filteredTables);
+
     res.status(200).json(filteredTables);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -28,7 +32,7 @@ const getResources = async (req, res) => {
 const getResource = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res.status(404).json({ error: "Enregistrement n'existe pas!" });
     }
 
@@ -82,7 +86,7 @@ const createResource = async (req, res) => {
 const deleteResource = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -111,7 +115,7 @@ const updateResource = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -123,7 +127,7 @@ const updateResource = async (req, res) => {
 
     // check if name not already exist
     const nameExist = await prisma.site.findFirst({
-      where: { name: name, id: { not } },
+      where: { name: name, id: { not: id } },
     });
     if (nameExist) {
       return res.status(400).json({ error: "Nom déjà utilisé!" });

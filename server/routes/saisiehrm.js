@@ -19,53 +19,80 @@ const {
 } = require("../controllers/saisiehrmController");
 
 const authMiddleware = require("../middleware/authMiddleware");
-const allowedRoles = require("../middleware/allowedRoles");
+// const allowedRoles = require("../middleware/allowedRoles");
+const { ACTION } = require("../helpers/constantes");
+const checkPermission = require("../middleware/checkPermission");
 
 const router = express.Router();
+const resource = "saisie_hrms";
 
 // require auth for all routes bellow
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
-router.post("/getSaisieHrm", getSaisieHrm);
+router.post(
+  "/getSaisieHrm",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getSaisieHrm
+);
+
 router.post(
   "/createSaisieHrm",
-  allowedRoles(["SUPER_ADMIN", "ADMIN", "AGENT_SAISIE"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
   createSaisieHrm
 );
 router.post(
   "/injectSaisieHrm",
-  allowedRoles(["SUPER_ADMIN", "ADMIN", "AGENT_SAISIE"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
   injectSaisieHrm
 );
 router.patch(
   "/updateSaisieHrm",
-  allowedRoles(["SUPER_ADMIN", "ADMIN", "AGENT_SAISIE"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.UPDATE),
   updateSaisieHrm
 );
 
 router.post(
   "/createSaisieHim",
-  allowedRoles(["SUPER_ADMIN", "ADMIN", "AGENT_SAISIE"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
   createSaisieHim
 );
 router.post(
   "/injectSaisieHim",
-  allowedRoles(["SUPER_ADMIN", "ADMIN", "AGENT_SAISIE"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
   injectSaisieHim
 );
 
 router.delete(
   "/deleteSaisieHim",
-  allowedRoles(["SUPER_ADMIN", "ADMIN", "AGENT_SAISIE"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.DELETE),
   deleteSaisieHim
 );
 router.patch(
   "/updateSaisieHim",
-  allowedRoles(["SUPER_ADMIN", "ADMIN", "AGENT_SAISIE"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.UPDATE),
   updateSaisieHim
 );
-router.post("/getSaisieHrmDay", getSaisieHrmDay);
 
-router.post("/byengin_and_date", get_byengin_and_date);
+router.post(
+  "/getSaisieHrmDay",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getSaisieHrmDay
+);
+
+router.post(
+  "/byengin_and_date",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  get_byengin_and_date
+);
 
 module.exports = router;

@@ -11,19 +11,31 @@ const {
 
 const authMiddleware = require("../middleware/authMiddleware");
 const checkPermission = require("../middleware/checkPermission");
+const { ACTION } = require("../helpers/constantes");
 
 const router = express.Router();
+const resource = "roles";
 
 // GET ALL ROLES
-router.get("/", authMiddleware, checkPermission("roles", "READ"), getRoles);
+router.get(
+  "/",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getRoles
+);
 
 // GET ROLE BY ID
-router.get("/:id", authMiddleware, checkPermission("roles", "READ"), getRole);
+router.get(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getRole
+);
 
 router.post(
   "/",
   authMiddleware,
-  checkPermission("roles", "CREATE"),
+  checkPermission(resource, ACTION.CREATE),
   createRole
 );
 
@@ -31,7 +43,7 @@ router.post(
 router.patch(
   "/",
   authMiddleware,
-  checkPermission("roles", "UPDATE"),
+  checkPermission(resource, ACTION.UPDATE),
   updateRole
 );
 
@@ -39,7 +51,7 @@ router.patch(
 router.delete(
   "/:id",
   authMiddleware,
-  checkPermission("roles", "DELETE"),
+  checkPermission(resource, ACTION.DELETE),
   deleteRole
 );
 

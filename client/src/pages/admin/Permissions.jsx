@@ -26,7 +26,7 @@ import {
   useCreatePermission,
   useDeletePermission,
 } from '../../hooks/usePermissions'
-import { cilPlus, cilTrash } from '@coreui/icons'
+import { cilInfo, cilPlus, cilTrash } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import { ACTIONS } from '../../helpers/constantes'
 

@@ -11,28 +11,61 @@ const {
 } = require("../controllers/parcController");
 
 const authMiddleware = require("../middleware/authMiddleware");
-const allowedRoles = require("../middleware/allowedRoles");
+// const allowedRoles = require("../middleware/allowedRoles");
+const checkPermission = require("../middleware/checkPermission");
+const { ACTION } = require("../helpers/constantes");
 
 const router = express.Router();
+const resource = "parcs";
 
 // require auth for all routes bellow
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
-router.get("/", getParcs);
+router.get(
+  "/",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getParcs
+);
 
 // GET single workout
-router.get("/:id", getParc);
+router.get(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getParc
+);
 
 // GET single workout
-router.get("/typeparc/:id", getParcsByTypeparc);
+router.get(
+  "/typeparc/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getParcsByTypeparc
+);
 
 // POST a new workout
-router.post("/", allowedRoles(["SUPER_ADMIN", "ADMIN"]), createParc);
+router.post(
+  "/",
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
+  createParc
+);
 
 // UPDATE a workout
-router.patch("/:id", allowedRoles(["SUPER_ADMIN", "ADMIN"]), updateParc);
+router.patch(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.UPDATE),
+  updateParc
+);
 
 // DELETE a workout
-router.delete("/:id", allowedRoles(["SUPER_ADMIN", "ADMIN"]), deleteParc);
+router.delete(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.DELETE),
+  deleteParc
+);
 
 module.exports = router;

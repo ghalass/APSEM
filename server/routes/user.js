@@ -4,7 +4,7 @@ const express = require("express");
 const {
   loginUser,
   signupUser,
-  getByEmail,
+  // getByEmail,
   changePassword,
   getUsers,
   updateUser,
@@ -15,8 +15,12 @@ const {
   createSuperAdmin,
 } = require("../controllers/userController");
 
-const allowedRoles = require("../middleware/allowedRoles");
+// const allowedRoles = require("../middleware/allowedRoles");
 const authMiddleware = require("../middleware/authMiddleware");
+const checkPermission = require("../middleware/checkPermission");
+const { ACTION } = require("../helpers/constantes");
+
+const resource = "users";
 
 const router = express.Router();
 
@@ -33,31 +37,30 @@ router.post("/logout", logoutUser);
 router.get("/create_super_admin", createSuperAdmin);
 
 // refresh route
-router.post("/refresh", refresh);
+// router.post("/refresh", refresh);
 
 // checktoken route
 router.get("/checktoken", checkToken);
 
-/*************************** REQUIRE AUTH FOR ALL ROUTES BELLOW ***************************/
-// router.use(authMiddleware);
-
 // get user route
-router.post("/getByEmail", authMiddleware, getByEmail);
+// router.post("/getByEmail", authMiddleware, getByEmail);
 
 // get user route
 router.post("/changePassword", authMiddleware, changePassword);
 
 // GET ALL USERS
-router.get("/users", authMiddleware, getUsers);
-
-// CREATE A NEW USER ==> ONLY ADMIN & SUPER_ADMIN ARE ALLOWRD
-// router.post("/signup", allowedRoles(["SUPER_ADMIN", "ADMIN"]), signupUser);
+router.get(
+  "/users",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getUsers
+);
 
 // UPDATE AN USER
 router.patch(
   "/updateUser",
-  // authMiddleware,
-  // allowedRoles(["SUPER_ADMIN", "ADMIN"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.UPDATE),
   updateUser
 );
 
@@ -65,7 +68,7 @@ router.patch(
 router.delete(
   "/:id",
   authMiddleware,
-  allowedRoles(["SUPER_ADMIN", "ADMIN"]),
+  checkPermission(resource, ACTION.DELETE),
   deleteUser
 );
 

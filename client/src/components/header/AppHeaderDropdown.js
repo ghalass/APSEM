@@ -46,9 +46,24 @@ const AppHeaderDropdown = () => {
     <CDropdown variant="nav-item" alignment="end">
       <CDropdownToggle placement="bottom-end" className="py-0 pe-0" caret={false}>
         <div className="d-none d-sm-inline-block me-1">Bienvenue</div>
+
+        {/*  */}
         <div className="d-none d-sm-inline-block text-uppercase fw-bold me-1">
           {user && user?.name}
         </div>
+
+        <div className="d-none d-sm-inline-block fw-bold me-1">
+          [
+          {user.roles.map((r, i) => (
+            <span key={i}>
+              {r.name}
+              {i + 1 < user.roles.length && ','}
+            </span>
+          ))}
+          ]
+        </div>
+
+        {/*  */}
         <div className="d-none d-sm-inline-block me-1">
           <CBadge className="col-sm" textBgColor="light" shape="rounded-pill">
             {/* {user && user?.role.replace("_", " ")} */}

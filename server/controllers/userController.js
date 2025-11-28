@@ -194,23 +194,23 @@ const logoutUser = async (req, res) => {
 };
 
 // login user
-const getByEmail = async (req, res) => {
-  const { email } = req.body;
+// const getByEmail = async (req, res) => {
+//   const { email } = req.body;
 
-  try {
-    const user = await prisma.user.findFirst({
-      where: { email: email },
-      omit: { password: true },
-    });
+//   try {
+//     const user = await prisma.user.findFirst({
+//       where: { email: email },
+//       omit: { password: true },
+//     });
 
-    if (!user) {
-      return res.status(400).json({ error: "Utilisateur non trouvé!." });
-    }
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
+//     if (!user) {
+//       return res.status(400).json({ error: "Utilisateur non trouvé!." });
+//     }
+//     res.status(200).json(user);
+//   } catch (error) {
+//     res.status(400).json({ error: error.message });
+//   }
+// };
 
 // signup user
 const changePassword = async (req, res) => {
@@ -405,42 +405,42 @@ const updateUser = async (req, res) => {
   }
 };
 
-const refresh = async (req, res) => {
-  const cookies = req.cookies;
-  // return res.json({ cookies })
-  // check if token exist
-  if (!cookies?.Bearer)
-    return res.status(401).json({ message: "Unauthorized" });
-  const refreshToken = cookies.refreshToken;
-  jwt.verify(
-    refreshToken,
-    process.env.REFRESH_TOKEN_SECRET,
-    async (err, decoded) => {
-      if (err) return res.status(403).json({ message: "Forbidden" });
-      // check if user exist
-      const foundedUser = await prisma.user.findFirst({
-        where: { id: decoded?.id },
-      });
-      if (!foundedUser) res.status(401).json({ message: "Unauthorized" });
+// const refresh = async (req, res) => {
+//   const cookies = req.cookies;
+//   // return res.json({ cookies })
+//   // check if token exist
+//   if (!cookies?.Bearer)
+//     return res.status(401).json({ message: "Unauthorized" });
+//   const refreshToken = cookies.refreshToken;
+//   jwt.verify(
+//     refreshToken,
+//     process.env.REFRESH_TOKEN_SECRET,
+//     async (err, decoded) => {
+//       if (err) return res.status(403).json({ message: "Forbidden" });
+//       // check if user exist
+//       const foundedUser = await prisma.user.findFirst({
+//         where: { id: decoded?.id },
+//       });
+//       if (!foundedUser) res.status(401).json({ message: "Unauthorized" });
 
-      const accessToken = jwt.sign(
-        {
-          id: foundedUser.id,
-          name: foundedUser.name,
-          email: foundedUser.email,
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "15m" }
-      );
+//       const accessToken = jwt.sign(
+//         {
+//           id: foundedUser.id,
+//           name: foundedUser.name,
+//           email: foundedUser.email,
+//         },
+//         process.env.ACCESS_TOKEN_SECRET,
+//         { expiresIn: "15m" }
+//       );
 
-      res.status(200).json({
-        email: foundedUser.email,
-        name: foundedUser.name,
-        token: accessToken,
-      });
-    }
-  );
-};
+//       res.status(200).json({
+//         email: foundedUser.email,
+//         name: foundedUser.name,
+//         token: accessToken,
+//       });
+//     }
+//   );
+// };
 
 const checkToken = async (req, res, next) => {
   const cookies = req.cookies;
@@ -561,11 +561,11 @@ const createSuperAdmin = async (req, res, next) => {
 module.exports = {
   loginUser,
   signupUser,
-  getByEmail,
+  // getByEmail,
   changePassword,
   getUsers,
   updateUser,
-  refresh,
+  // refresh,
   deleteUser,
   logoutUser,
   checkToken,

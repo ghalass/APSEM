@@ -67,7 +67,7 @@ const createSaisieLubrifiant = async (req, res) => {
 const deleteSaisieLubrifiant = async (req, res) => {
   try {
     const { id } = req.body;
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });

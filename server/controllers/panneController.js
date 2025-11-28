@@ -17,7 +17,7 @@ const getPannes = async (req, res) => {
 const getPanne = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res.status(404).json({ error: "Enregistrement n'existe pas!" });
     }
 
@@ -74,7 +74,7 @@ const createPanne = async (req, res) => {
 const deletePanne = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -105,7 +105,7 @@ const updatePanne = async (req, res) => {
   const { name, typepanneId } = req.body;
 
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -117,7 +117,7 @@ const updatePanne = async (req, res) => {
 
     // check if name not already exist
     const nameExist = await prisma.panne.findFirst({
-      where: { name, id: { not } },
+      where: { name, id: { not: id } },
     });
     if (nameExist) {
       return res.status(401).json({ error: "Nom déjà utilisé!" });
@@ -141,7 +141,7 @@ const updatePanne = async (req, res) => {
 const fetchPannesByTypepanne = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res.status(404).json({ error: "Enregistrement n'existe pas!" });
     }
 

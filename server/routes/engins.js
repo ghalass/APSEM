@@ -12,30 +12,68 @@ const {
 } = require("../controllers/enginController");
 
 const authMiddleware = require("../middleware/authMiddleware");
-const allowedRoles = require("../middleware/allowedRoles");
+// const allowedRoles = require("../middleware/allowedRoles");
+const checkPermission = require("../middleware/checkPermission");
+const { ACTION } = require("../helpers/constantes");
 
 const router = express.Router();
+const resource = "engins";
 
 // require auth for all routes bellow
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
-router.get("/", getEngins);
+router.get(
+  "/",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getEngins
+);
 
 // GET single workout
-router.get("/:id", getEngin);
+router.get(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getEngin
+);
 
 // GET single workout
-router.get("/byparcid/:id", getEnginByParcId);
+router.get(
+  "/byparcid/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getEnginByParcId
+);
 
-router.get("/parc/:parcId/site/:siteId", getEnginsByParcIdSiteId);
+router.get(
+  "/parc/:parcId/site/:siteId",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getEnginsByParcIdSiteId
+);
 
 // POST a new workout
-router.post("/", allowedRoles(["SUPER_ADMIN", "ADMIN"]), createEngin);
+router.post(
+  "/",
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
+  createEngin
+);
 
 // UPDATE a workout
-router.patch("/:id", allowedRoles(["SUPER_ADMIN", "ADMIN"]), updateEngin);
+router.patch(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.UPDATE),
+  updateEngin
+);
 
 // DELETE a workout
-router.delete("/:id", allowedRoles(["SUPER_ADMIN", "ADMIN"]), deleteEngin);
+router.delete(
+  "/:id",
+  authMiddleware,
+  checkPermission(resource, ACTION.DELETE),
+  deleteEngin
+);
 
 module.exports = router;

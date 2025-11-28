@@ -16,7 +16,7 @@ const getSites = async (req, res) => {
 const getSite = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res.status(404).json({ error: "Enregistrement n'existe pas!" });
     }
 
@@ -70,7 +70,7 @@ const createSite = async (req, res) => {
 const deleteSite = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -99,7 +99,7 @@ const updateSite = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -111,7 +111,7 @@ const updateSite = async (req, res) => {
 
     // check if name not already exist
     const nameExist = await prisma.site.findFirst({
-      where: { name: name, id: { not } },
+      where: { name: name, id: { not: id } },
     });
     if (nameExist) {
       return res.status(400).json({ error: "Nom déjà utilisé!" });

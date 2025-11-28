@@ -11,14 +11,16 @@ const {
 
 const authMiddleware = require("../middleware/authMiddleware");
 const checkPermission = require("../middleware/checkPermission");
+const { ACTION } = require("../helpers/constantes");
 
 const router = express.Router();
+const resource = "permissions";
 
 // GET ALL PERMISSIONS
 router.get(
   "/",
   authMiddleware,
-  checkPermission("permissions", "READ"),
+  checkPermission(resource, ACTION.READ),
   getPermissions
 );
 
@@ -33,7 +35,7 @@ router.get(
 router.post(
   "/",
   authMiddleware,
-  checkPermission("permissions", "CREATE"),
+  checkPermission(resource, ACTION.CREATE),
   createPermission
 );
 
@@ -49,7 +51,7 @@ router.post(
 router.delete(
   "/:id",
   authMiddleware,
-  checkPermission("permissions", "DELETE"),
+  checkPermission(resource, ACTION.DELETE),
   deletePermission
 );
 

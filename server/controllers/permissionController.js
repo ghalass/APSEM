@@ -115,7 +115,7 @@ const deletePermission = async (req, res) => {
 
 //     // check if name not already exist
 //     const nameExist = await prisma.permission.findFirst({
-//       where: { name: name, id: { not } },
+//       where: { name: name, id: { not: id } },
 //     });
 //     if (nameExist) {
 //       return res

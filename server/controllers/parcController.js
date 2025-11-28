@@ -31,7 +31,7 @@ const getParcsByTypeparc = async (req, res) => {
 const getParc = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res.status(404).json({ error: "Enregistrement n'existe pas!" });
     }
 
@@ -88,7 +88,7 @@ const createParc = async (req, res) => {
 const deleteParc = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -119,7 +119,7 @@ const updateParc = async (req, res) => {
     const { id } = req.params;
     const { name, typeparcId } = req.body;
 
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -136,7 +136,7 @@ const updateParc = async (req, res) => {
 
     // check if name not already exist
     const nameExist = await prisma.parc.findFirst({
-      where: { name, id: { not } },
+      where: { name, id: { not: id } },
     });
     if (nameExist) {
       return res.status(401).json({ error: "Nom déjà utilisé!" });

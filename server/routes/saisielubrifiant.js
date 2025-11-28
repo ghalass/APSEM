@@ -8,23 +8,33 @@ const {
 } = require("../controllers/saisielubrifiantController");
 
 const authMiddleware = require("../middleware/authMiddleware");
-const allowedRoles = require("../middleware/allowedRoles");
+// const allowedRoles = require("../middleware/allowedRoles");
+const { ACTION } = require("../helpers/constantes");
+const checkPermission = require("../middleware/checkPermission");
 
 const router = express.Router();
+const resource = "saisie_lubrifiants";
 
 // require auth for all routes bellow
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
 router.post(
   "/createSaisieLubrifiant",
-  allowedRoles(["SUPER_ADMIN", "ADMIN", "AGENT_SAISIE"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
   createSaisieLubrifiant
 );
 router.delete(
   "/deleteSaisieLubrifiant",
-  allowedRoles(["SUPER_ADMIN", "ADMIN", "AGENT_SAISIE"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.DELETE),
   deleteSaisieLubrifiant
 );
-router.post("/getallsaisielubbymonth", getallsaisielubbymonth);
+router.post(
+  "/getallsaisielubbymonth",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getallsaisielubbymonth
+);
 
 module.exports = router;

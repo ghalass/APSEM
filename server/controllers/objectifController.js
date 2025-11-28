@@ -17,7 +17,7 @@ const getObjectifs = async (req, res) => {
 const getObjectif = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res.status(404).json({ error: "Enregistrement n'existe pas!" });
     }
 
@@ -96,7 +96,7 @@ const createObjectif = async (req, res) => {
 const deleteObjectif = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -135,7 +135,7 @@ const updateObjectif = async (req, res) => {
     spe_graisse,
   } = req.body;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -148,7 +148,7 @@ const updateObjectif = async (req, res) => {
     // check if name not already exist
     const nameExist = await prisma.objectif.findFirst({
       where: {
-        id: { not },
+        id: { not: id },
         annee: parseInt(annee),
         parcId: parseInt(parcId),
         siteId: parseInt(siteId),

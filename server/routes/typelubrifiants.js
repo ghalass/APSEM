@@ -10,32 +10,47 @@ const {
 } = require("../controllers/typelubrifiantController");
 
 const authMiddleware = require("../middleware/authMiddleware");
-const allowedRoles = require("../middleware/allowedRoles");
+// const allowedRoles = require("../middleware/allowedRoles");
+const { ACTION } = require("../helpers/constantes");
+const checkPermission = require("../middleware/checkPermission");
 
 const router = express.Router();
+const resource = "type_lubrifiants";
 
 // require auth for all routes bellow
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
-router.get("/", getTypelubrifiant);
+router.get(
+  "/",
+  authMiddleware,
+  checkPermission(resource, ACTION.READ),
+  getTypelubrifiant
+);
 
 // // GET single workout
 // router.get('/:id', getTypepanne)
 
 // POST a new workout
-router.post("/", allowedRoles(["SUPER_ADMIN", "ADMIN"]), createTypelubrifiant);
+router.post(
+  "/",
+  authMiddleware,
+  checkPermission(resource, ACTION.CREATE),
+  createTypelubrifiant
+);
 
 // UPDATE a workout
 router.patch(
   "/:id",
-  allowedRoles(["SUPER_ADMIN", "ADMIN"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.UPDATE),
   updateTypelubrifiant
 );
 
 // DELETE a workout
 router.delete(
   "/:id",
-  allowedRoles(["SUPER_ADMIN", "ADMIN"]),
+  authMiddleware,
+  checkPermission(resource, ACTION.DELETE),
   deleteTypelubrifiant
 );
 

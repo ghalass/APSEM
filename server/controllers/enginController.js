@@ -23,7 +23,7 @@ const getEngins = async (req, res) => {
 const getEngin = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res.status(404).json({ error: "Enregistrement n'existe pas!" });
     }
 
@@ -46,7 +46,7 @@ const getEngin = async (req, res) => {
 const getEnginByParcId = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res.status(404).json({ error: "Enregistrement n'existe pas!" });
     }
 
@@ -145,7 +145,7 @@ const createEngin = async (req, res) => {
 const deleteEngin = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -176,7 +176,7 @@ const updateEngin = async (req, res) => {
     const { id } = req.params;
     const { name, parcId, siteId, initialHeureChassis, active } = req.body;
 
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -184,7 +184,7 @@ const updateEngin = async (req, res) => {
 
     // check if name not already exist
     const nameExist = await prisma.engin.findFirst({
-      where: { name, id: { not } },
+      where: { name, id: { not: id } },
     });
     if (nameExist) {
       return res.status(400).json({ error: "Nom déjà utilisé!" });

@@ -121,7 +121,7 @@ const updateRole = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -133,7 +133,7 @@ const updateRole = async (req, res) => {
 
     // check if name not already exist
     const nameExist = await prisma.role.findFirst({
-      where: { name: name, id: { not } },
+      where: { name: name, id: { not: id } },
     });
     if (nameExist) {
       return res

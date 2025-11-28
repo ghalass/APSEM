@@ -28,7 +28,7 @@ const getTypeconsommationlubs = async (req, res) => {
 const getTypeconsommationlub = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res.status(404).json({ error: "Enregistrement n'existe pas!" });
     }
 
@@ -82,7 +82,7 @@ const createTypeconsommationlub = async (req, res) => {
 const deleteTypeconsommationlub = async (req, res) => {
   const { id } = req.params;
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -124,7 +124,7 @@ const updateTypeconsommationlub = async (req, res) => {
   const { name } = req.body;
 
   try {
-    if (isNaN(id) || parseInt(id) != id) {
+    if (!id) {
       return res
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
@@ -136,7 +136,7 @@ const updateTypeconsommationlub = async (req, res) => {
 
     // check if name not already exist
     const nameExist = await prisma.typeconsommationlub.findFirst({
-      where: { name: name, id: { not } },
+      where: { name: name, id: { not: id } },
     });
     if (nameExist) {
       return res.status(400).json({ error: "Nom déjà utilisé!" });
