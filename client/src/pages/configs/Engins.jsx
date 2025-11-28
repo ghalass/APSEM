@@ -23,6 +23,7 @@ import {
   cilToggleOff,
   cilToggleOn,
   cilTrash,
+  cilWarning,
 } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import { useQuery } from '@tanstack/react-query'
@@ -37,7 +38,7 @@ import {
 import { useTypeparcs } from '../../hooks/useTypeparcs'
 import { useParcsByTypeParc } from '../../hooks/useParcs'
 import { fecthSitesQuery } from '../../hooks/useSites'
-import TableHead from './TableHead'
+import TableHead from '../../components/TableHead'
 
 const Engins = () => {
   const getAllQuery = useQuery(fecthEnginsQuery())
@@ -146,6 +147,15 @@ const Engins = () => {
   }
   // Calculate total pages
   const totalPages = Math.ceil(filteredEntitys?.length / entitysPerPage)
+
+  if (getAllQuery.isError) {
+    return (
+      <CAlert color="warning" className="d-flex align-items-center">
+        <CIcon icon={cilWarning} className="flex-shrink-0 me-2" width={24} height={24} />
+        <div>{getAllQuery?.error?.message}</div>
+      </CAlert>
+    )
+  }
 
   return (
     <div>

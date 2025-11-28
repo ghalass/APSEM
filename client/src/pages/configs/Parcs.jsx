@@ -15,14 +15,14 @@ import {
   CTableRow,
 } from '@coreui/react'
 import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react'
-import { cilCloudDownload, cilPenNib, cilPlus, cilTrash } from '@coreui/icons'
+import { cilCloudDownload, cilPenNib, cilPlus, cilTrash, cilWarning } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { exportExcel, getMultiplesOf } from '../../helpers/func'
 import { useCreateParc, useDeleteTypeparc, useParcs, useUpdateTypeparc } from '../../hooks/useParcs'
 import { useTypeparcs } from '../../hooks/useTypeparcs'
-import TableHead from './TableHead'
+import TableHead from '../../components/TableHead'
 
 const Parcs = () => {
   const getAllQuery = useQuery(useParcs())
@@ -115,6 +115,15 @@ const Parcs = () => {
   }
   // Calculate total pages
   const totalPages = Math.ceil(filteredEntitys?.length / entitysPerPage)
+
+  if (getAllQuery.isError) {
+    return (
+      <CAlert color="warning" className="d-flex align-items-center">
+        <CIcon icon={cilWarning} className="flex-shrink-0 me-2" width={24} height={24} />
+        <div>{getAllQuery?.error?.message}</div>
+      </CAlert>
+    )
+  }
 
   return (
     <div>

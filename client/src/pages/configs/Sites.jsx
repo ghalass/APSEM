@@ -16,7 +16,7 @@ import CIcon from '@coreui/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { fecthSitesQuery, useCreateSite, useDeleteSite, useUpdateSite } from '../../hooks/useSites'
 import { toast } from 'react-toastify'
-import TableHead from './TableHead'
+import TableHead from '../../components/TableHead'
 
 const Sites = () => {
   const getAllQuery = useQuery(fecthSitesQuery())

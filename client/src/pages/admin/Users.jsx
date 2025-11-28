@@ -32,7 +32,7 @@ import { cilPenNib, cilTrash } from '@coreui/icons'
 import TableHead from '../configs/TableHead'
 import { fecthRolesQuery } from '../../hooks/useRoles'
 import AdminLayout from '../../layout/AdminLayout'
-// import TableHead from './TableHead'
+// import TableHead from '../../components/TableHead'
 
 const Users = () => {
   const getAllQuery = useQuery(fecthUsersQuery())

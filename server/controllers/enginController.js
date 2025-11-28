@@ -8,10 +8,6 @@ const getEngins = async (req, res) => {
       orderBy: { name: "asc" },
     });
 
-    if (!engins.length) {
-      return res.status(404).json({ message: "No engins found" });
-    }
-
     res.status(200).json(engins);
   } catch (error) {
     console.error("Error fetching engins:", error);
@@ -35,7 +31,6 @@ const getEngin = async (req, res) => {
     if (!engin) {
       return res.status(404).json({ error: "Enregistrement n'existe pas!" });
     }
-
     res.status(200).json(engin);
   } catch (error) {
     res.status(500).json({ error: error.message });

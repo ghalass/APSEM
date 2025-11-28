@@ -12,11 +12,11 @@ import {
   CTableRow,
 } from '@coreui/react'
 import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react'
-import { cilPenNib, cilTrash } from '@coreui/icons'
+import { cilPenNib, cilTrash, cilWarning } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import TableHead from './TableHead'
+import TableHead from '../../components/TableHead'
 import {
   fecthObjectifsQuery,
   useCreateObjectif,
@@ -135,6 +135,15 @@ const Objectifs = () => {
   }
   // Calculate total pages
   const totalPages = Math.ceil(filteredEntitys?.length / entitysPerPage)
+
+  if (getAllQuery.isError) {
+    return (
+      <CAlert color="warning" className="d-flex align-items-center">
+        <CIcon icon={cilWarning} className="flex-shrink-0 me-2" width={24} height={24} />
+        <div>{getAllQuery?.error?.message}</div>
+      </CAlert>
+    )
+  }
 
   return (
     <div>
