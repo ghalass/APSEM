@@ -1,1 +1,0 @@
-export const ACTION = [CREATE, READ, UPDATE, DELETE];

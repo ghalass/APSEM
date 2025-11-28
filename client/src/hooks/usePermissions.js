@@ -3,7 +3,7 @@ import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query
 import {
   fetchPermissions,
   createPermission,
-  updatePermission,
+  // updatePermission,
   deletePermission,
 } from '../api/PermissionApi'
 
@@ -24,15 +24,15 @@ export const useCreatePermission = () => {
   })
 }
 
-export const useUpdatePermission = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: updatePermission,
-    onSuccess: () => {
-      queryClient.invalidateQueries(['permissionsList'])
-    },
-  })
-}
+// export const useUpdatePermission = () => {
+//   const queryClient = useQueryClient()
+//   return useMutation({
+//     mutationFn: updatePermission,
+//     onSuccess: () => {
+//       queryClient.invalidateQueries(['permissionsList'])
+//     },
+//   })
+// }
 
 export const useDeletePermission = () => {
   const queryClient = useQueryClient()

@@ -460,7 +460,7 @@ const checkToken = async (req, res, next) => {
 
       // CHECK IF USER EXIST IN DATABASE
       const foundedUser = await prisma.user.findFirst({
-        where: { id: decoded?.id },
+        where: { id: decoded?.userId },
         include: { roles: { include: { permissions: true } } },
       });
       if (!foundedUser) res.status(401).json({ error: "UNAUTHORIZED" });

@@ -21,7 +21,7 @@ export const API_PATHS = {
   PERMISSIONS: {
     GET_ALL_PERMISSIONS: '/permissions',
     ADD_PERMISSION: '/permissions',
-    UPDATE_PERMISSION: (permissionId) => `/permissions/${permissionId}`,
+    // UPDATE_PERMISSION: (permissionId) => `/permissions/${permissionId}`,
     DELETE_PERMISSION: (permissionId) => `/permissions/${permissionId}`,
   },
   RESOURCES: {

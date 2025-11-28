@@ -2,6 +2,8 @@ import { cilBadge } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import { CNav, CNavItem, CNavLink } from '@coreui/react'
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '../context/Auth'
+import UnauthorizedPage from '../components/UnauthorizedPage'
 
 export default function AdminLayout({ children }) {
   const pages = [
@@ -11,23 +13,31 @@ export default function AdminLayout({ children }) {
     { to: '/admin/users', label: 'Utilisateurs', icon: cilBadge },
   ]
 
+  const { isAdminOrSuperAdmin } = useAuth()
+
   return (
     <div>
-      <CNav variant="tabs" className="justify-content-center mb-2">
-        {pages.map((p) => (
-          <CNavItem key={p.to}>
-            <CNavLink
-              to={p.to}
-              as={NavLink}
-              end={p.end}
-              className={({ isActive }) => (isActive ? 'text-primary active' : 'text-primary')}
-            >
-              <CIcon icon={p.icon} size="lg" /> {p.label}
-            </CNavLink>
-          </CNavItem>
-        ))}
-      </CNav>
-      <div>{children}</div>
+      {isAdminOrSuperAdmin ? (
+        <>
+          <CNav variant="tabs" className="justify-content-center mb-2">
+            {pages.map((p) => (
+              <CNavItem key={p.to}>
+                <CNavLink
+                  to={p.to}
+                  as={NavLink}
+                  end={p.end}
+                  className={({ isActive }) => (isActive ? 'text-primary active' : 'text-primary')}
+                >
+                  <CIcon icon={p.icon} size="lg" /> {p.label}
+                </CNavLink>
+              </CNavItem>
+            ))}
+          </CNav>
+          <div>{children}</div>
+        </>
+      ) : (
+        <UnauthorizedPage />
+      )}
     </div>
   )
 }

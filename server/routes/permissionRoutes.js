@@ -3,7 +3,7 @@ const express = require("express");
 // controller functions
 const {
   getPermission,
-  updatePermission,
+  // updatePermission,
   deletePermission,
   createPermission,
   getPermissions,
@@ -23,12 +23,12 @@ router.get(
 );
 
 // GET PERMISSION BY ID
-router.get(
-  "/:id",
-  authMiddleware,
-  checkPermission("permissions", "READ"),
-  getPermission
-);
+// router.get(
+//   "/:id",
+//   authMiddleware,
+//   checkPermission("permissions", "READ"),
+//   getPermission
+// );
 
 router.post(
   "/",
@@ -38,12 +38,12 @@ router.post(
 );
 
 // UPDATE AN PERMISSION
-router.patch(
-  "/",
-  authMiddleware,
-  checkPermission("permissions", "UPDATE"),
-  updatePermission
-);
+// router.patch(
+//   "/",
+//   authMiddleware,
+//   checkPermission("permissions", "UPDATE"),
+//   updatePermission
+// );
 
 // DELETE AN PERMISSION
 router.delete(

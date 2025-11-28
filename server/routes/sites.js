@@ -10,7 +10,9 @@ const {
 } = require("../controllers/siteController");
 
 const authMiddleware = require("../middleware/authMiddleware");
-const allowedRoles = require("../middleware/allowedRoles");
+const checkPermission = require("../middleware/checkPermission");
+const { ACTION } = require("../helpers/constantes");
+// const allowedRoles = require("../middleware/allowedRoles");
 // const verifyJWT = require('../middleware/verifyJWT')
 
 const router = express.Router();
@@ -20,18 +22,18 @@ router.use(authMiddleware);
 // router.use(verifyJWT)
 
 // GET all
-router.get("/", getSites);
+router.get("/", checkPermission("sites", ACTION.READ), getSites);
 
 // GET single workout
-router.get("/:id", getSite);
+router.get("/:id", checkPermission("sites", ACTION.READ), getSite);
 
 // POST a new workout
-router.post("/", allowedRoles(["SUPER_ADMIN", "ADMIN"]), createSite);
+router.post("/", checkPermission("sites", ACTION.CREATE), createSite);
 
 // UPDATE a workout
-router.patch("/:id", allowedRoles(["SUPER_ADMIN", "ADMIN"]), updateSite);
+router.patch("/:id", checkPermission("sites", ACTION.UPDATE), updateSite);
 
 // DELETE a workout
-router.delete("/:id", allowedRoles(["SUPER_ADMIN", "ADMIN"]), deleteSite);
+router.delete("/:id", checkPermission("sites", ACTION.DELETE), deleteSite);
 
 module.exports = router;

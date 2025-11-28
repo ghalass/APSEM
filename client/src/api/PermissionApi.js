@@ -10,13 +10,13 @@ export const createPermission = async (resource) => {
   return apiRequest(API_PATHS.PERMISSIONS.ADD_PERMISSION, 'POST', resource)
 }
 
-export const updatePermission = async (updatedPermission) => {
-  return apiRequest(
-    API_PATHS.PERMISSIONS.UPDATE_PERMISSION(updatedPermission.id),
-    'PATCH',
-    updatedPermission,
-  )
-}
+// export const updatePermission = async (updatedPermission) => {
+//   return apiRequest(
+//     API_PATHS.PERMISSIONS.UPDATE_PERMISSION(updatedPermission.id),
+//     'PATCH',
+//     updatedPermission,
+//   )
+// }
 
 export const deletePermission = async (resourceToDelete) => {
   return apiRequest(API_PATHS.PERMISSIONS.DELETE_PERMISSION(resourceToDelete.id), 'DELETE')
