@@ -29,6 +29,7 @@ const rolesRoutes = require("./routes/RoleRoutes");
 const resourcesRoutes = require("./routes/resourceRoutes");
 const permissionsRoutes = require("./routes/permissionRoutes");
 const assignRoutes = require("./routes/assignRoutes");
+const importRoutes = require("./routes/importRoutes");
 
 // express app
 const app = express();
@@ -74,6 +75,7 @@ app.use("/roles", rolesRoutes);
 app.use("/permissions", permissionsRoutes);
 app.use("/assign", assignRoutes);
 app.use("/resources", resourcesRoutes);
+app.use("/import", importRoutes);
 
 // 404 route
 app.all("*", (req, res) => {

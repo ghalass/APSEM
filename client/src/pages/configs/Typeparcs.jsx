@@ -26,6 +26,7 @@ import {
 import { toast } from 'react-toastify'
 import { exportExcel, getMultiplesOf } from '../../helpers/func'
 import TableHead from '../../components/TableHead'
+import ConfigLayout from '../../layout/ConfigLayout'
 
 const Typeparcs = () => {
   const getAllQuery = useQuery(useTypeparcs())
@@ -125,7 +126,7 @@ const Typeparcs = () => {
   }
 
   return (
-    <div>
+    <ConfigLayout>
       <TableHead
         title="Liste des types des parcs"
         getAllQuery={getAllQuery}
@@ -280,7 +281,7 @@ const Typeparcs = () => {
           )}
         </CModalFooter>
       </CModal>
-    </div>
+    </ConfigLayout>
   )
 }
 

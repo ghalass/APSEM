@@ -718,7 +718,7 @@ const getSpecLub = async (req, res) => {
     const endDate = new Date(yearNum + 1, 0, 1);
 
     const typelubrifiant = await prisma.typelubrifiant.findUnique({
-      where: { id: parseInt(typelubrifiantId) },
+      where: { id: typelubrifiantId },
     });
 
     if (!typelubrifiant) {
@@ -739,7 +739,7 @@ const getSpecLub = async (req, res) => {
         const parcResult = {
           parc: parc.name,
           nombe_engin: parc.engins.length,
-          typelubrifiantId: parseInt(typelubrifiantId),
+          typelubrifiantId: typelubrifiantId,
           typelubrifiant: typelubrifiant.name,
           hrm_total: 0,
           qte_total: 0,
@@ -771,7 +771,7 @@ const getSpecLub = async (req, res) => {
 
         const qteByMonth = await prisma.saisielubrifiant.findMany({
           where: {
-            Lubrifiant: { typelubrifiantId: parseInt(typelubrifiantId) },
+            Lubrifiant: { typelubrifiantId: typelubrifiantId },
             Saisiehim: {
               Saisiehrm: {
                 enginId: { in: parc.engins.map((e) => e.id) },
@@ -856,7 +856,7 @@ const getParetoIndispoParc = async (req, res) => {
     const hoursInMonth = daysInMonth * 24;
 
     const parc = await prisma.parc.findUnique({
-      where: { id: parseInt(parcId) },
+      where: { id: parcId },
       include: {
         engins: {
           where: {
@@ -987,7 +987,7 @@ const getParetoIndispoParc = async (req, res) => {
           year: year.toString(),
           month: month.toString(),
           nombe_engin: parc.engins.length,
-          panne: panneMap.get(parseInt(panneId)) || "Inconnue",
+          panne: panneMap.get(panneId) || "Inconnue",
           indispo: indispo,
           engins: enginsList,
           engins_mtbf: enginsMtbfList,
@@ -1021,7 +1021,7 @@ const getParetoMtbfParc = async (req, res) => {
 
     // Récupération du parc avec tous ses engins (actifs et inactifs)
     const parc = await prisma.parc.findUnique({
-      where: { id: parseInt(parcId) },
+      where: { id: parcId },
       include: {
         engins: {
           select: {
@@ -1039,7 +1039,7 @@ const getParetoMtbfParc = async (req, res) => {
     // Récupérer l'objectif MTBF pour le parc et l'année
     const objectif = await prisma.objectif.findFirst({
       where: {
-        AND: [{ annee: year }, { parcId: parseInt(parcId) }],
+        AND: [{ annee: year }, { parcId: parcId }],
       },
       select: {
         mtbf: true,
@@ -1135,12 +1135,12 @@ const getAnalyseSpcPeriodParcTypeConsomm = async (req, res) => {
     const saisies = await prisma.saisielubrifiant.findMany({
       where: {
         Lubrifiant: {
-          typelubrifiantId: parseInt(typelubrifiantId),
+          typelubrifiantId: typelubrifiantId,
         },
         Typeconsommationlub: {
           parcs: {
             some: {
-              parcId: parseInt(parcId),
+              parcId: parcId,
             },
           },
         },
@@ -1151,7 +1151,7 @@ const getAnalyseSpcPeriodParcTypeConsomm = async (req, res) => {
               lte: new Date(dateAu),
             },
             Engin: {
-              parcId: parseInt(parcId),
+              parcId: parcId,
             },
           },
         },
@@ -1201,7 +1201,7 @@ const getIndispoParcPeriode = async (req, res) => {
     }
 
     const parc = await prisma.parc.findUnique({
-      where: { id: parseInt(parcId) },
+      where: { id: parcId },
       select: { name: true },
     });
 
@@ -1217,7 +1217,7 @@ const getIndispoParcPeriode = async (req, res) => {
             lte: new Date(dateAu),
           },
           Engin: {
-            parcId: parseInt(parcId),
+            parcId: parcId,
           },
         },
       },
@@ -1301,7 +1301,7 @@ const getIndispoEnginsPeriode = async (req, res) => {
     }
 
     const parc = await prisma.parc.findUnique({
-      where: { id: parseInt(parcId) },
+      where: { id: parcId },
       select: { name: true },
     });
 
@@ -1317,7 +1317,7 @@ const getIndispoEnginsPeriode = async (req, res) => {
             lte: new Date(dateAu),
           },
           Engin: {
-            parcId: parseInt(parcId),
+            parcId: parcId,
           },
         },
       },
@@ -1407,7 +1407,7 @@ const getPerormancesEnginsPeriode = async (req, res) => {
     }
 
     const parc = await prisma.parc.findUnique({
-      where: { id: parseInt(parcId) },
+      where: { id: parcId },
       select: { name: true },
     });
 
@@ -1429,7 +1429,7 @@ const getPerormancesEnginsPeriode = async (req, res) => {
           lte: endDate,
         },
         Engin: {
-          parcId: parseInt(parcId),
+          parcId: parcId,
         },
       },
       include: {

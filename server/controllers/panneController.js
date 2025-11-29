@@ -62,7 +62,7 @@ const createPanne = async (req, res) => {
     }
 
     const panne = await prisma.panne.create({
-      data: { name, typepanneId: parseInt(typepanneId) },
+      data: { name, typepanneId: typepanneId },
     });
     res.status(201).json(panne);
   } catch (error) {
@@ -129,7 +129,7 @@ const updatePanne = async (req, res) => {
 
     const updatedWorkout = await prisma.panne.update({
       where: { id },
-      data: { name, typepanneId: parseInt(typepanneId) },
+      data: { name, typepanneId: typepanneId },
     });
 
     res.status(200).json(updatedWorkout);
@@ -147,7 +147,7 @@ const fetchPannesByTypepanne = async (req, res) => {
 
     const panne = await prisma.panne.findMany({
       include: { Typepanne: true },
-      where: { typepanneId },
+      where: { typepanneId: id },
     });
 
     if (!panne) {

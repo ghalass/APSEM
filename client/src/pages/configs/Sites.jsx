@@ -17,6 +17,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fecthSitesQuery, useCreateSite, useDeleteSite, useUpdateSite } from '../../hooks/useSites'
 import { toast } from 'react-toastify'
 import TableHead from '../../components/TableHead'
+import ConfigLayout from '../../layout/ConfigLayout'
 
 const Sites = () => {
   const getAllQuery = useQuery(fecthSitesQuery())
@@ -115,7 +116,7 @@ const Sites = () => {
   }
 
   return (
-    <div>
+    <ConfigLayout>
       <TableHead
         title="Liste des sites"
         getAllQuery={getAllQuery}
@@ -270,7 +271,7 @@ const Sites = () => {
           )}
         </CModalFooter>
       </CModal>
-    </div>
+    </ConfigLayout>
   )
 }
 

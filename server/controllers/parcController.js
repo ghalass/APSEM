@@ -17,12 +17,13 @@ const getParcsByTypeparc = async (req, res) => {
   try {
     const { id } = req.params;
     const parcs = await prisma.parc.findMany({
-      where: { typeparcId },
+      where: { typeparcId: id },
       include: { Typeparc: true },
       orderBy: { name: "asc" },
     });
     res.status(200).json(parcs);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -76,7 +77,7 @@ const createParc = async (req, res) => {
     }
 
     const parc = await prisma.parc.create({
-      data: { name, typeparcId: parseInt(typeparcId) },
+      data: { name, typeparcId: typeparcId },
     });
     res.status(201).json(parc);
   } catch (error) {
@@ -124,11 +125,6 @@ const updateParc = async (req, res) => {
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
     }
-    if (isNaN(typeparcId) || parseInt(typeparcId) != typeparcId) {
-      return res
-        .status(404)
-        .json({ error: "Enregistrement n'est pas trouvé!" });
-    }
 
     const parc = await prisma.parc.findFirst({
       where: { id },
@@ -148,7 +144,7 @@ const updateParc = async (req, res) => {
 
     const updatedWorkout = await prisma.parc.update({
       where: { id },
-      data: { name, typeparcId: parseInt(typeparcId) },
+      data: { name, typeparcId: typeparcId },
     });
 
     res.status(200).json(updatedWorkout);

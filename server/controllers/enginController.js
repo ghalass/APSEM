@@ -55,6 +55,8 @@ const getEnginByParcId = async (req, res) => {
 
     res.status(200).json(engin);
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({ error: error.message });
   }
 };
@@ -74,16 +76,8 @@ const getEnginsByParcIdSiteId = async (req, res) => {
         .json({ error: "Veuillez remplir tout les champs!", emptyFields });
     }
 
-    if (isNaN(parcId) || parseInt(parcId) != parcId) {
-      return res.status(404).json({ error: "Enregistrement n'existe pas!" });
-    }
-
-    if (isNaN(siteId) || parseInt(siteId) != siteId) {
-      return res.status(404).json({ error: "Enregistrement n'existe pas!" });
-    }
-
     const engin = await prisma.engin.findMany({
-      where: { parcId: parseInt(parcId), siteId: parseInt(siteId) },
+      where: { parcId: parcId, siteId: siteId },
     });
 
     // if (!engin) {
@@ -92,6 +86,8 @@ const getEnginsByParcIdSiteId = async (req, res) => {
 
     res.status(200).json(engin);
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({ error: error.message });
   }
 };
@@ -124,8 +120,8 @@ const createEngin = async (req, res) => {
     const engin = await prisma.engin.create({
       data: {
         name,
-        parcId: parseInt(parcId),
-        siteId: parseInt(siteId),
+        parcId: parcId,
+        siteId: siteId,
         initialHeureChassis: parseFloat(initialHeureChassis),
         active,
       },
@@ -196,8 +192,8 @@ const updateEngin = async (req, res) => {
       where: { id },
       data: {
         name,
-        parcId: parseInt(parcId),
-        siteId: parseInt(siteId),
+        parcId: parcId,
+        siteId: siteId,
         initialHeureChassis: parseFloat(initialHeureChassis),
         active,
       },

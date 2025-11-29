@@ -148,51 +148,57 @@ const _nav = [
     component: CNavTitle,
     name: 'Configurations',
   },
-  //
-  //
   {
-    component: CNavGroup,
-    name: 'Données de base',
-    icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'Engins',
-        to: '/configs/engins',
-      },
-      {
-        component: CNavItem,
-        name: 'Objectifs',
-        to: '/configs/objectifs',
-      },
-      {
-        component: CNavItem,
-        name: 'Pannes',
-        to: '/configs/pannes',
-      },
-      {
-        component: CNavItem,
-        name: 'Parcs',
-        to: '/configs/parcs',
-      },
-      {
-        component: CNavItem,
-        name: 'Typeparcs',
-        to: '/configs/typeparcs',
-      },
-      {
-        component: CNavItem,
-        name: 'Typepannes',
-        to: '/configs/typepannes',
-      },
-
-      {
-        component: CNavItem,
-        name: 'Sites',
-        to: '/configs/sites',
-      },
-    ],
+    component: CNavItem,
+    name: 'Configurations',
+    to: '/configs',
+    icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
   },
+  //
+  //
+  // {
+  //   component: CNavGroup,
+  //   name: 'Données de base',
+  //   icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+  //   items: [
+  //     {
+  //       component: CNavItem,
+  //       name: 'Engins',
+  //       to: '/configs/engins',
+  //     },
+  //     {
+  //       component: CNavItem,
+  //       name: 'Objectifs',
+  //       to: '/configs/objectifs',
+  //     },
+  //     {
+  //       component: CNavItem,
+  //       name: 'Pannes',
+  //       to: '/configs/pannes',
+  //     },
+  //     {
+  //       component: CNavItem,
+  //       name: 'Parcs',
+  //       to: '/configs/parcs',
+  //     },
+  //     {
+  //       component: CNavItem,
+  //       name: 'Typeparcs',
+  //       to: '/configs/typeparcs',
+  //     },
+  //     {
+  //       component: CNavItem,
+  //       name: 'Typepannes',
+  //       to: '/configs/typepannes',
+  //     },
+
+  //     {
+  //       component: CNavItem,
+  //       name: 'Sites',
+  //       to: '/configs/sites',
+  //     },
+  //   ],
+  // },
 ]
 
 export default _nav

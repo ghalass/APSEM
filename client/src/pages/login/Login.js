@@ -20,6 +20,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { loginQuery } from '../../hooks/useUsers'
 import { useAuth } from '../../context/Auth'
 import ThemeToggle from '../../components/ThemeToggle'
+import { toast } from 'react-toastify'
 
 const Login = () => {
   const loginMutation = loginQuery()

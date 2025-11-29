@@ -32,6 +32,7 @@ import {
 import { useTypelubrifiants } from '../../hooks/useTypelubrifiants'
 import TableHead from '../../components/TableHead'
 import { useParcs } from '../../hooks/useParcs'
+import ConfigLayout from '../../layout/ConfigLayout'
 
 const Lubrifiants = () => {
   const getAllTypelubrifiantsQuery = useQuery(useTypelubrifiants())
@@ -196,7 +197,7 @@ const Lubrifiants = () => {
   }
 
   return (
-    <div>
+    <ConfigLayout>
       <TableHead
         title="Liste des lubrifiants"
         getAllQuery={getAllQuery}
@@ -504,7 +505,7 @@ const Lubrifiants = () => {
           )}
         </CModalBody>
       </CModal>
-    </div>
+    </ConfigLayout>
   )
 }
 

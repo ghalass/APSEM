@@ -3,14 +3,22 @@ import React from 'react'
 const Home = React.lazy(() => import('./pages/home/Home'))
 const Chat = React.lazy(() => import('./pages/chat/Chat'))
 const About = React.lazy(() => import('./pages/home/About'))
+
+const Config = React.lazy(() => import('./pages/configs/Config'))
 const Sites = React.lazy(() => import('./pages/configs/Sites'))
 const Typeparcs = React.lazy(() => import('./pages/configs/Typeparcs'))
 const Parcs = React.lazy(() => import('./pages/configs/Parcs'))
 const Engins = React.lazy(() => import('./pages/configs/Engins'))
 const Typelubrifiants = React.lazy(() => import('./pages/configs/Typelubrifiants'))
 const Lubrifiants = React.lazy(() => import('./pages/configs/Lubrifiants'))
+const Typepannes = React.lazy(() => import('./pages/configs/Typepannes'))
+const Pannes = React.lazy(() => import('./pages/configs/Pannes'))
+const Typeconsommationlubs = React.lazy(() => import('./pages/configs/Typeconsommationlubs'))
+const Objectifs = React.lazy(() => import('./pages/configs/Objectifs'))
+
 const SaisieRje = React.lazy(() => import('./pages/saisies/SaisieRje'))
 const SaisieRjeDonnees = React.lazy(() => import('./pages/saisies/SaisieRjeDonnees'))
+
 const EtatMensuel = React.lazy(() => import('./pages/rapports_performances/EtatMensuel'))
 const HeuresChassis = React.lazy(() => import('./pages/rapports_performances/HeuresChassis'))
 const ParetosInDispo = React.lazy(() => import('./pages/rapports_performances/ParetosInDispo'))
@@ -18,16 +26,7 @@ const RapportIndispo = React.lazy(() => import('./pages/rapports_performances/Ra
 const RapportRje = React.lazy(() => import('./pages/rapports_performances/RapportRje'))
 const RapportSpecLub = React.lazy(() => import('./pages/rapports_performances/RapportSpecLub'))
 const UnitePhysique = React.lazy(() => import('./pages/rapports_performances/UnitePhysique'))
-const Profile = React.lazy(() => import('./pages/user/Profile'))
-const Page404 = React.lazy(() => import('./pages/page404/Page404'))
 
-const Typepannes = React.lazy(() => import('./pages/configs/Typepannes'))
-const Pannes = React.lazy(() => import('./pages/configs/Pannes'))
-const Typeconsommationlubs = React.lazy(() => import('./pages/configs/Typeconsommationlubs'))
-const SpeByParcByLubByTypeConsomm = React.lazy(
-  () => import('./pages/analyses/lubrifiants/SpeByParcByLubByTypeConsomm'),
-)
-const Ventilation = React.lazy(() => import('./pages/analyses/lubrifiants/Ventilation'))
 const IndispoParcPeriode = React.lazy(
   () => import('./pages/analyses/performances/IndispoParcPeriode'),
 )
@@ -37,12 +36,19 @@ const IndispoEnginPeriode = React.lazy(
 const PerformancePeriode = React.lazy(
   () => import('./pages/analyses/performances/PerformancePeriode'),
 )
-const Objectifs = React.lazy(() => import('./pages/configs/Objectifs'))
+const SpeByParcByLubByTypeConsomm = React.lazy(
+  () => import('./pages/analyses/lubrifiants/SpeByParcByLubByTypeConsomm'),
+)
+const Ventilation = React.lazy(() => import('./pages/analyses/lubrifiants/Ventilation'))
 
 const Admin = React.lazy(() => import('./pages/admin/Admin'))
 const Permissions = React.lazy(() => import('./pages/admin/Permissions'))
 const Roles = React.lazy(() => import('./pages/admin/Roles'))
 const Users = React.lazy(() => import('./pages/admin/Users'))
+const ImportPage = React.lazy(() => import('./pages/admin/Import'))
+
+const Profile = React.lazy(() => import('./pages/user/Profile'))
+const Page404 = React.lazy(() => import('./pages/page404/Page404'))
 
 const routes = [
   { path: '/', name: 'Home', element: Home },
@@ -51,6 +57,8 @@ const routes = [
   { path: '/*', name: 'Page404', element: Page404 },
 
   { path: '/user/profile', name: 'Profile', element: Profile },
+
+  { path: '/configs', name: 'Configs', element: Config },
   { path: '/configs/sites', name: 'Sites', element: Sites },
   { path: '/configs/typeparcs', name: 'Typeparcs', element: Typeparcs },
   { path: '/configs/parcs', name: 'Parcs', element: Parcs },
@@ -60,18 +68,18 @@ const routes = [
   { path: '/configs/pannes', name: 'Pannes', element: Pannes },
   { path: '/configs/typelubrifiants', name: 'Typelubrifiants', element: Typelubrifiants },
   { path: '/configs/lubrifiants', name: 'lubrifiants', element: Lubrifiants },
-
-  { path: '/admin', name: 'admin', element: Admin },
-  { path: '/admin/roles', name: 'roles', element: Roles },
-  { path: '/admin/permissions', name: 'permissions', element: Permissions },
-  { path: '/admin/users', name: 'users', element: Users },
-
+  { path: '/configs/objectifs', name: 'objectifs', element: Objectifs },
   {
     path: '/configs/typeconsommationlubs',
     name: 'typeconsommationlubs',
     element: Typeconsommationlubs,
   },
-  { path: '/configs/objectifs', name: 'objectifs', element: Objectifs },
+
+  { path: '/admin', name: 'admin', element: Admin },
+  { path: '/admin/roles', name: 'roles', element: Roles },
+  { path: '/admin/permissions', name: 'permissions', element: Permissions },
+  { path: '/admin/users', name: 'users', element: Users },
+  { path: '/admin/import', name: 'import', element: ImportPage },
 
   {
     path: '/analyse/speclub_par_parc_periode',

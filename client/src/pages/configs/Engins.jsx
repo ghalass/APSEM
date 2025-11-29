@@ -39,6 +39,7 @@ import { useTypeparcs } from '../../hooks/useTypeparcs'
 import { useParcsByTypeParc } from '../../hooks/useParcs'
 import { fecthSitesQuery } from '../../hooks/useSites'
 import TableHead from '../../components/TableHead'
+import ConfigLayout from '../../layout/ConfigLayout'
 
 const Engins = () => {
   const getAllQuery = useQuery(fecthEnginsQuery())
@@ -158,7 +159,7 @@ const Engins = () => {
   }
 
   return (
-    <div>
+    <ConfigLayout>
       <TableHead
         title="Liste des engins"
         getAllQuery={getAllQuery}
@@ -469,7 +470,7 @@ const Engins = () => {
           )}
         </CModalFooter>
       </CModal>
-    </div>
+    </ConfigLayout>
   )
 }
 

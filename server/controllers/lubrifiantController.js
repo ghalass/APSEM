@@ -88,7 +88,7 @@ const createLubrifiant = async (req, res) => {
     }
 
     const lubrifiant = await prisma.lubrifiant.create({
-      data: { name, typelubrifiantId: parseInt(typelubrifiantId) },
+      data: { name, typelubrifiantId: typelubrifiantId },
     });
     res.status(201).json(lubrifiant);
   } catch (error) {
@@ -136,14 +136,6 @@ const updateLubrifiant = async (req, res) => {
         .status(404)
         .json({ error: "Enregistrement n'est pas trouvé!" });
     }
-    if (
-      isNaN(typelubrifiantId) ||
-      parseInt(typelubrifiantId) != typelubrifiantId
-    ) {
-      return res
-        .status(404)
-        .json({ error: "Enregistrement n'est pas trouvé!" });
-    }
 
     const lubrifiant = await prisma.lubrifiant.findFirst({
       where: { id },
@@ -163,7 +155,7 @@ const updateLubrifiant = async (req, res) => {
 
     const updatedWorkout = await prisma.lubrifiant.update({
       where: { id },
-      data: { name, typelubrifiantId: parseInt(typelubrifiantId) },
+      data: { name, typelubrifiantId: typelubrifiantId },
     });
 
     res.status(200).json(updatedWorkout);
@@ -192,8 +184,8 @@ const addParcToLubrifiant = async (req, res) => {
     const existingRelation = await prisma.lubrifiantParc.findUnique({
       where: {
         parcId_lubrifiantId: {
-          parcId: parseInt(parc_id),
-          lubrifiantId: parseInt(lubrifiant_id),
+          parcId: parc_id,
+          lubrifiantId: lubrifiant_id,
         },
       },
     });
@@ -207,8 +199,8 @@ const addParcToLubrifiant = async (req, res) => {
     // Create new relationship - CORRECTED VERSION
     const updated = await prisma.lubrifiantParc.create({
       data: {
-        parc: { connect: { id: parseInt(parc_id) } },
-        lubrifiant: { connect: { id: parseInt(lubrifiant_id) } },
+        parc: { connect: { id: parc_id } },
+        lubrifiant: { connect: { id: lubrifiant_id } },
       },
       include: {
         parc: true,
@@ -246,8 +238,8 @@ const deleteAffectationLubrifiant = async (req, res) => {
     const lubrifiant_parc = await prisma.lubrifiantParc.findUnique({
       where: {
         parcId_lubrifiantId: {
-          parcId: parseInt(parc_id),
-          lubrifiantId: parseInt(lubrifiant_id),
+          parcId: parc_id,
+          lubrifiantId: lubrifiant_id,
         },
       },
     });
@@ -260,8 +252,8 @@ const deleteAffectationLubrifiant = async (req, res) => {
     await prisma.lubrifiantParc.delete({
       where: {
         parcId_lubrifiantId: {
-          parcId: parseInt(parc_id),
-          lubrifiantId: parseInt(lubrifiant_id),
+          parcId: parc_id,
+          lubrifiantId: lubrifiant_id,
         },
       },
     });
@@ -280,7 +272,7 @@ const getAllLubrifiantsByParcId = async (req, res) => {
       where: {
         LubrifiantParc: {
           some: {
-            parcId,
+            parcId: id,
           },
         },
       },

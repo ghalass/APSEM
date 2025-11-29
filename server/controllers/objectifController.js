@@ -64,8 +64,8 @@ const createObjectif = async (req, res) => {
     const exists = await prisma.objectif.findFirst({
       where: {
         annee: parseInt(annee),
-        parcId: parseInt(parcId),
-        siteId: parseInt(siteId),
+        parcId: parcId,
+        siteId: siteId,
       },
     });
 
@@ -76,8 +76,8 @@ const createObjectif = async (req, res) => {
     const objectif = await prisma.objectif.create({
       data: {
         annee: parseInt(annee),
-        parcId: parseInt(parcId),
-        siteId: parseInt(siteId),
+        parcId: parcId,
+        siteId: siteId,
         dispo: parseFloat(dispo),
         mtbf: parseFloat(mtbf),
         tdm: parseFloat(tdm),
@@ -150,8 +150,8 @@ const updateObjectif = async (req, res) => {
       where: {
         id: { not: id },
         annee: parseInt(annee),
-        parcId: parseInt(parcId),
-        siteId: parseInt(siteId),
+        parcId: parcId,
+        siteId: siteId,
       },
     });
     if (nameExist) {
@@ -165,9 +165,9 @@ const updateObjectif = async (req, res) => {
     const updatedWorkout = await prisma.objectif.update({
       where: { id },
       data: {
-        annee: parseInt(annee),
-        parcId: parseInt(parcId),
-        siteId: parseInt(siteId),
+        annee: parseInt(),
+        parcId: parcId,
+        siteId: siteId,
         dispo: parseFloat(dispo),
         mtbf: parseFloat(mtbf),
         tdm: parseFloat(tdm),

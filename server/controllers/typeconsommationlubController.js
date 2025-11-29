@@ -176,8 +176,8 @@ const addParcToCodeTypeconsommationlub = async (req, res) => {
     const existingRelation = await prisma.typeconsommationlubParc.findUnique({
       where: {
         parcId_typeconsommationlubId: {
-          parcId: parseInt(parc_id),
-          typeconsommationlubId: parseInt(typeconsommationlub_id),
+          parcId: parc_id,
+          typeconsommationlubId: typeconsommationlub_id,
         },
       },
     });
@@ -191,9 +191,9 @@ const addParcToCodeTypeconsommationlub = async (req, res) => {
     // Create new relationship - CORRECTED VERSION
     const updated = await prisma.typeconsommationlubParc.create({
       data: {
-        parc: { connect: { id: parseInt(parc_id) } },
+        parc: { connect: { id: parc_id } },
         typeconsommationlub: {
-          connect: { id: parseInt(typeconsommationlub_id) },
+          connect: { id: typeconsommationlub_id },
         },
       },
       include: {
@@ -233,8 +233,8 @@ const deleteAffectationCodeToParc = async (req, res) => {
       await prisma.typeconsommationlubParc.findUnique({
         where: {
           parcId_typeconsommationlubId: {
-            parcId: parseInt(parc_id),
-            typeconsommationlubId: parseInt(typeconsommationlub_id),
+            parcId: parc_id,
+            typeconsommationlubId: typeconsommationlub_id,
           },
         },
       });
@@ -247,8 +247,8 @@ const deleteAffectationCodeToParc = async (req, res) => {
     await prisma.typeconsommationlubParc.delete({
       where: {
         parcId_typeconsommationlubId: {
-          parcId: parseInt(parc_id),
-          typeconsommationlubId: parseInt(typeconsommationlub_id),
+          parcId: parc_id,
+          typeconsommationlubId: typeconsommationlub_id,
         },
       },
     });
@@ -267,7 +267,7 @@ const getAllTypeconsommationlubsByParcId = async (req, res) => {
       where: {
         parcs: {
           some: {
-            parcId,
+            parcId: id,
           },
         },
       },

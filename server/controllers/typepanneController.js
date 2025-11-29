@@ -185,8 +185,8 @@ const addParcToTypepanne = async (req, res) => {
     const existingRelation = await prisma.typepanneParc.findUnique({
       where: {
         parcId_typepanneId: {
-          parcId: parseInt(parc_id),
-          typepanneId: parseInt(typepanne_id),
+          parcId: parc_id,
+          typepanneId: typepanne_id,
         },
       },
     });
@@ -200,8 +200,8 @@ const addParcToTypepanne = async (req, res) => {
     // Create new relationship - CORRECTED VERSION
     const updated = await prisma.typepanneParc.create({
       data: {
-        parc: { connect: { id: parseInt(parc_id) } },
-        typepanne: { connect: { id: parseInt(typepanne_id) } },
+        parc: { connect: { id: parc_id } },
+        typepanne: { connect: { id: typepanne_id } },
       },
       include: {
         parc: true,
@@ -239,8 +239,8 @@ const deleteAffectationTypepanne = async (req, res) => {
     const typepanne_parc = await prisma.typepanneParc.findUnique({
       where: {
         parcId_typepanneId: {
-          parcId: parseInt(parc_id),
-          typepanneId: parseInt(typepanne_id),
+          parcId: parc_id,
+          typepanneId: typepanne_id,
         },
       },
     });
@@ -253,8 +253,8 @@ const deleteAffectationTypepanne = async (req, res) => {
     await prisma.typepanneParc.delete({
       where: {
         parcId_typepanneId: {
-          parcId: parseInt(parc_id),
-          typepanneId: parseInt(typepanne_id),
+          parcId: parc_id,
+          typepanneId: typepanne_id,
         },
       },
     });
@@ -273,7 +273,7 @@ const getAllTypepannesByParcId = async (req, res) => {
       where: {
         TypepanneParc: {
           some: {
-            parcId,
+            parcId: id,
           },
         },
       },

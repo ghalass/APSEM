@@ -15,7 +15,7 @@ const createSaisieLubrifiant = async (req, res) => {
     }
     // check if panneId exist
     const lubrifiantIdExist = await prisma.lubrifiant.findFirst({
-      where: { id: parseInt(lubrifiantId) },
+      where: { id: lubrifiantId },
     });
     if (!lubrifiantIdExist)
       return res
@@ -24,7 +24,7 @@ const createSaisieLubrifiant = async (req, res) => {
 
     // check if saisiehimId exist
     const saisiehimIdExist = await prisma.saisiehim.findFirst({
-      where: { id: parseInt(saisiehimId) },
+      where: { id: saisiehimId },
     });
     if (!saisiehimIdExist)
       return res
@@ -34,8 +34,8 @@ const createSaisieLubrifiant = async (req, res) => {
     // check if already exist
     exist = await prisma.saisielubrifiant.findFirst({
       where: {
-        lubrifiantId: parseInt(lubrifiantId),
-        saisiehimId: parseInt(saisiehimId),
+        lubrifiantId: lubrifiantId,
+        saisiehimId: saisiehimId,
       },
     });
     if (exist)
@@ -46,12 +46,11 @@ const createSaisieLubrifiant = async (req, res) => {
 
     const savedSaisie = await prisma.saisielubrifiant.create({
       data: {
-        lubrifiantId: parseInt(lubrifiantId),
+        lubrifiantId: lubrifiantId,
         qte: parseFloat(qte),
         obs,
-        saisiehimId: parseInt(saisiehimId),
-        typeconsommationlubId:
-          parseInt(req.body?.typeconsommationlubId) || null,
+        saisiehimId: saisiehimId,
+        typeconsommationlubId: req.body?.typeconsommationlubId || null,
       },
       include: {
         Lubrifiant: { include: { Typelubrifiant: true } },

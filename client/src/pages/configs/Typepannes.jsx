@@ -31,6 +31,7 @@ import {
 } from '../../hooks/useTypepannes'
 import TableHead from '../../components/TableHead'
 import { useParcs } from '../../hooks/useParcs'
+import ConfigLayout from '../../layout/ConfigLayout'
 
 const Typepannes = () => {
   const getAllQuery = useQuery(useTypepannes())
@@ -190,7 +191,7 @@ const Typepannes = () => {
   }
 
   return (
-    <div>
+    <ConfigLayout>
       <TableHead
         title="Liste des types des pannes"
         getAllQuery={getAllQuery}
@@ -471,7 +472,7 @@ const Typepannes = () => {
           )}
         </CModalBody>
       </CModal>
-    </div>
+    </ConfigLayout>
   )
 }
 

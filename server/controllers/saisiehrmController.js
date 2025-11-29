@@ -6,14 +6,14 @@ const get_byengin_and_date = async (req, res) => {
 
     const saisieHRM = await prisma.saisiehrm.findMany({
       where: {
-        enginId: parseInt(enginId),
+        enginId: enginId,
         du: new Date(du),
       },
     });
 
     const saisieHIM = await prisma.saisiehim.findMany({
       where: {
-        enginId: parseInt(enginId),
+        enginId: enginId,
         du: new Date(du),
       },
     });
@@ -41,7 +41,7 @@ const createSaisieHrm = async (req, res) => {
     }
     // check if already exist
     exist = await prisma.saisiehrm.findFirst({
-      where: { du: new Date(du), enginId: parseInt(enginId) },
+      where: { du: new Date(du), enginId: enginId },
     });
 
     if (isNaN(hrm) || hrm > 24 || hrm < 0)
@@ -57,8 +57,8 @@ const createSaisieHrm = async (req, res) => {
     const savedSaisie = await prisma.saisiehrm.create({
       data: {
         du: new Date(du),
-        enginId: parseInt(enginId),
-        siteId: parseInt(siteId),
+        enginId: enginId,
+        siteId: siteId,
         hrm: parseFloat(hrm),
       },
     });
@@ -127,14 +127,14 @@ const createSaisieHim = async (req, res) => {
     }
     // check if panneId exist
     panneExist = await prisma.panne.findFirst({
-      where: { id: parseInt(panneId) },
+      where: { id: panneId },
     });
     if (!panneExist)
       return res.status(400).json({ error: "Panne n'existe pas", panneId });
 
     // check if already exist
     exist = await prisma.saisiehim.findFirst({
-      where: { panneId: parseInt(panneId), saisiehrmId: parseInt(saisiehrmId) },
+      where: { panneId: panneId, saisiehrmId: saisiehrmId },
     });
     if (exist)
       return res.status(400).json({
@@ -145,11 +145,11 @@ const createSaisieHim = async (req, res) => {
     // CHECK TOTAL HRM & HIM
     const totlaHRM = await prisma.saisiehrm.aggregate({
       _sum: { hrm: true },
-      where: { id: parseInt(saisiehrmId) },
+      where: { id: saisiehrmId },
     });
     const totlaHIM = await prisma.saisiehim.aggregate({
       _sum: { him: true },
-      where: { saisiehrmId: parseInt(saisiehrmId) },
+      where: { saisiehrmId: saisiehrmId },
     });
     const him_hrm_saisie = totlaHRM._sum.hrm + totlaHIM._sum.him + Number(him);
     let message = `HRM saisie = ${totlaHRM._sum.hrm || 0}\n`;
@@ -161,10 +161,10 @@ const createSaisieHim = async (req, res) => {
 
     const savedSaisie = await prisma.saisiehim.create({
       data: {
-        panneId: parseInt(panneId),
+        panneId: panneId,
         him: parseFloat(him),
         ni: parseInt(ni),
-        saisiehrmId: parseInt(saisiehrmId),
+        saisiehrmId: saisiehrmId,
       },
     });
     return res.status(201).json(savedSaisie);
@@ -226,11 +226,11 @@ const updateSaisieHim = async (req, res) => {
     // CHECK TOTAL HRM & HIM
     const totlaHRM = await prisma.saisiehrm.aggregate({
       _sum: { hrm: true },
-      where: { id: parseInt(saisiehrmId) },
+      where: { id: saisiehrmId },
     });
     const totlaHIM = await prisma.saisiehim.aggregate({
       _sum: { him: true },
-      where: { saisiehrmId: parseInt(saisiehrmId) },
+      where: { saisiehrmId: saisiehrmId },
     });
     const him_hrm_saisie = totlaHRM._sum.hrm + totlaHIM._sum.him + Number(him);
     let message = `HRM saisie = ${totlaHRM._sum.hrm || 0}\n`;
@@ -243,7 +243,7 @@ const updateSaisieHim = async (req, res) => {
     const updated = await prisma.saisiehim.update({
       where: { id },
       data: {
-        panneId: parseInt(panneId),
+        panneId: panneId,
         him: parseFloat(him),
         ni: parseInt(ni),
       },
@@ -275,7 +275,7 @@ const getSaisieHrm = async (req, res) => {
           gte: startDate, // Greater than or equal to start of day
           lt: endDate, // Less than start of next day
         },
-        enginId: parseInt(enginId),
+        enginId: enginId,
       },
       include: {
         Saisiehim: {
@@ -468,7 +468,7 @@ const injectSaisieHrm = async (req, res) => {
     exist = await prisma.saisiehrm.findFirst({
       where: {
         du: new Date(saisieInputs.du),
-        enginId: parseInt(saisieInputs.enginId),
+        enginId: saisieInputs.enginId,
       },
     });
     if (exist)
@@ -479,8 +479,8 @@ const injectSaisieHrm = async (req, res) => {
     await prisma.saisiehrm.create({
       data: {
         du: new Date(saisieInputs.du),
-        enginId: parseInt(saisieInputs.enginId),
-        siteId: parseInt(saisieInputs.siteId),
+        enginId: saisieInputs.enginId,
+        siteId: saisieInputs.siteId,
         hrm: parseFloat(saisieInputs.hrm),
       },
     });
@@ -492,6 +492,7 @@ const injectSaisieHrm = async (req, res) => {
     console.log(error);
   }
 };
+
 const injectSaisieHim = async (req, res) => {
   try {
     let saisieInputs = {
@@ -547,7 +548,7 @@ const injectSaisieHim = async (req, res) => {
       });
 
     const saisieHrm = await prisma.saisiehrm.findUnique({
-      where: { du: new Date(req.body?.DATE_RJE), enginId: parseInt(engin?.id) },
+      where: { du: new Date(req.body?.DATE_RJE), enginId: engin?.id },
     });
     if (!saisieHrm)
       return res
@@ -582,14 +583,14 @@ const injectSaisieHim = async (req, res) => {
     // }
     // check if panneId exist
     panneExist = await prisma.panne.findFirst({
-      where: { id: parseInt(panneId) },
+      where: { id: panneId },
     });
     if (!panneExist)
       return res.status(400).json({ error: "Panne n'existe pas", panneId });
 
     // check if already exist
     exist = await prisma.saisiehim.findFirst({
-      where: { panneId: parseInt(panneId), saisiehrmId: parseInt(saisiehrmId) },
+      where: { panneId: panneId, saisiehrmId: saisiehrmId },
     });
     if (exist)
       return res.status(400).json({
@@ -600,11 +601,11 @@ const injectSaisieHim = async (req, res) => {
     // CHECK TOTAL HRM & HIM
     const totlaHRM = await prisma.saisiehrm.aggregate({
       _sum: { hrm: true },
-      where: { id: parseInt(saisiehrmId) },
+      where: { id: saisiehrmId },
     });
     const totlaHIM = await prisma.saisiehim.aggregate({
       _sum: { him: true },
-      where: { saisiehrmId: parseInt(saisiehrmId) },
+      where: { saisiehrmId: saisiehrmId },
     });
     const him_hrm_saisie = totlaHRM._sum.hrm + totlaHIM._sum.him + Number(him);
     let message = `HRM saisie = ${totlaHRM._sum.hrm || 0}\n`;
@@ -616,10 +617,10 @@ const injectSaisieHim = async (req, res) => {
 
     const savedSaisie = await prisma.saisiehim.create({
       data: {
-        panneId: parseInt(panneId),
+        panneId: panneId,
         him: parseFloat(him),
         ni: parseInt(ni),
-        saisiehrmId: parseInt(saisiehrmId),
+        saisiehrmId: saisiehrmId,
       },
     });
     return res.status(201).json(savedSaisie);

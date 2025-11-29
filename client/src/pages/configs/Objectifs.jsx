@@ -25,6 +25,7 @@ import {
 } from '../../hooks/useObjectifs'
 import { fecthSitesQuery } from '../../hooks/useSites'
 import { useParcs } from '../../hooks/useParcs'
+import ConfigLayout from '../../layout/ConfigLayout'
 
 const Objectifs = () => {
   const getAllQuery = useQuery(fecthObjectifsQuery())
@@ -146,7 +147,7 @@ const Objectifs = () => {
   }
 
   return (
-    <div>
+    <ConfigLayout>
       <TableHead
         title="Liste des objectifs"
         getAllQuery={getAllQuery}
@@ -513,7 +514,7 @@ const Objectifs = () => {
           )}
         </CModalFooter>
       </CModal>
-    </div>
+    </ConfigLayout>
   )
 }
 

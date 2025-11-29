@@ -1,4 +1,4 @@
-import { cilBadge } from '@coreui/icons'
+import { cibPlayerMe, cil3d, cilBadge, cilCloudUpload, cilUser } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import { CNav, CNavItem, CNavLink } from '@coreui/react'
 import { NavLink } from 'react-router-dom'
@@ -7,10 +7,11 @@ import UnauthorizedPage from '../components/UnauthorizedPage'
 
 export default function AdminLayout({ children }) {
   const pages = [
-    { to: '/admin', label: 'Admin', icon: cilBadge, end: true },
-    { to: '/admin/roles', label: 'Rôles' },
-    { to: '/admin/permissions', label: 'Permissions', icon: cilBadge },
-    { to: '/admin/users', label: 'Utilisateurs', icon: cilBadge },
+    { to: '/admin', label: 'Admin', icon: cil3d, end: true },
+    { to: '/admin/roles', label: 'Rôles', icon: cilBadge },
+    { to: '/admin/permissions', label: 'Permissions', icon: cibPlayerMe },
+    { to: '/admin/users', label: 'Utilisateurs', icon: cilUser },
+    { to: '/admin/import', label: 'Importation', icon: cilCloudUpload },
   ]
 
   const { isAdminOrSuperAdmin } = useAuth()

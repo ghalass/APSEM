@@ -28,6 +28,7 @@ import {
   useUpdateTypeconsommationlub,
 } from '../../hooks/useTypeconsommationlubs'
 import { useParcs } from '../../hooks/useParcs'
+import ConfigLayout from '../../layout/ConfigLayout'
 
 const Typeconsommationlubs = () => {
   const getAllQuery = useQuery(useTypeconsommationlubs())
@@ -186,7 +187,7 @@ const Typeconsommationlubs = () => {
   }
 
   return (
-    <div>
+    <ConfigLayout>
       <TableHead
         title="Liste des code de consommation"
         getAllQuery={getAllQuery}
@@ -467,7 +468,7 @@ const Typeconsommationlubs = () => {
           )}
         </CModalBody>
       </CModal>
-    </div>
+    </ConfigLayout>
   )
 }
 

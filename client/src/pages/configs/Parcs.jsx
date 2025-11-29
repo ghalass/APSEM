@@ -23,6 +23,7 @@ import { exportExcel, getMultiplesOf } from '../../helpers/func'
 import { useCreateParc, useDeleteTypeparc, useParcs, useUpdateTypeparc } from '../../hooks/useParcs'
 import { useTypeparcs } from '../../hooks/useTypeparcs'
 import TableHead from '../../components/TableHead'
+import ConfigLayout from '../../layout/ConfigLayout'
 
 const Parcs = () => {
   const getAllQuery = useQuery(useParcs())
@@ -126,7 +127,7 @@ const Parcs = () => {
   }
 
   return (
-    <div>
+    <ConfigLayout>
       <TableHead
         title="Liste des parcs"
         getAllQuery={getAllQuery}
@@ -308,7 +309,7 @@ const Parcs = () => {
           )}
         </CModalFooter>
       </CModal>
-    </div>
+    </ConfigLayout>
   )
 }
 

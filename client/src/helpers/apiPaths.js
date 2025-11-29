@@ -40,6 +40,9 @@ export const API_PATHS = {
     DELETE_SITE: (siteId) => `/sites/${siteId}`,
     DOWNLOAD_SITES: '/sites/downloadexcel',
   },
+  IMPORTER: {
+    IMPORT_DATA: '/import',
+  },
   OBJECTIFS: {
     GET_ALL_OBJECTIFS: '/objectifs',
     ADD_OBJECTIF: '/objectifs',
