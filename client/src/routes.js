@@ -17,6 +17,7 @@ const Typeconsommationlubs = React.lazy(() => import('./pages/configs/Typeconsom
 const Objectifs = React.lazy(() => import('./pages/configs/Objectifs'))
 
 const SaisieRje = React.lazy(() => import('./pages/saisies/SaisieRje'))
+const SaisieRjeV2Page = React.lazy(() => import('./pages/saisies/SaisieRjeV2'))
 const SaisieRjeDonnees = React.lazy(() => import('./pages/saisies/SaisieRjeDonnees'))
 
 const EtatMensuel = React.lazy(() => import('./pages/rapports_performances/EtatMensuel'))
@@ -87,7 +88,9 @@ const routes = [
     element: SpeByParcByLubByTypeConsomm,
   },
 
-  { path: '/saisie/rje', name: 'SaisieRje', element: SaisieRje },
+  // { path: '/saisie/rje', name: 'SaisieRje', element: SaisieRje },
+  { path: '/saisie/rje', name: 'SaisieRje', element: SaisieRjeV2Page },
+
   { path: '/saisie/donnees-rje', name: 'Données RJE saisie', element: SaisieRjeDonnees },
 
   { path: '/rapport/rapport-rje', name: 'Rapport RJE', element: RapportRje },

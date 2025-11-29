@@ -1,181 +1,318 @@
-import React, { useState } from 'react'
-import { useGetSaisieHrmDay } from '../../hooks/useSaisieRje'
+import React, { useState, useMemo } from 'react'
+import {
+  CButton,
+  CFormInput,
+  CSpinner,
+  CTable,
+  CCard,
+  CCardBody,
+  CCardHeader,
+  CAlert,
+  CBadge,
+  CInputGroup,
+  CInputGroupText,
+} from '@coreui/react'
 import { useQuery } from '@tanstack/react-query'
-import { CButton, CFormInput, CSpinner, CTable } from '@coreui/react'
+import { useGetSaisieHrmDay } from '../../hooks/useSaisieRje'
 import { exportExcel } from '../../helpers/func'
+import { cilSearch, cilCloudDownload, cilReload } from '@coreui/icons'
+import CIcon from '@coreui/icons-react'
 
 const SaisieRjeDonnees = () => {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 7))
-  const getSaisieHrmDay = useQuery(useGetSaisieHrmDay(date))
+  const [searchFilters, setSearchFilters] = useState({
+    typeparc: '',
+    parc: '',
+    engin: '',
+    site: '',
+  })
 
-  const [searchByTypeparc, setSearchByTypeparc] = useState('')
-  const [searchByParc, setSearchByParc] = useState('')
-  const [searchByEngin, setSearchByEngin] = useState('')
-  const [searchBySite, setSearchBySite] = useState('')
+  const { data, isFetching, isError, error, refetch } = useQuery(useGetSaisieHrmDay(date))
 
-  const handleClick = () => {
-    getSaisieHrmDay.refetch()
+  // Filtrage des données avec useMemo pour optimiser les performances
+  const filteredData = useMemo(() => {
+    if (!data) return []
+
+    return data.filter((item) =>
+      Object.entries(searchFilters).every(([key, value]) => {
+        const itemValue = item[key] || ''
+        return itemValue.toString().toLowerCase().includes(value.toLowerCase())
+      }),
+    )
+  }, [data, searchFilters])
+
+  const handleSearchChange = (field, value) => {
+    setSearchFilters((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
   }
 
-  const filteredData = getSaisieHrmDay?.data?.filter(
-    (item) =>
-      item.typeparc?.toLowerCase().includes(searchByTypeparc.toLowerCase()) &&
-      item.parc?.toLowerCase().includes(searchByParc.toLowerCase()) &&
-      item.engin?.toLowerCase().includes(searchByEngin.toLowerCase()) &&
-      item.site?.toLowerCase().includes(searchBySite.toLowerCase()),
-  )
+  const handleGenerateReport = () => {
+    refetch()
+  }
+
+  const handleExportExcel = () => {
+    if (filteredData.length > 0) {
+      exportExcel('tbl_donnees_saisies', `Données_saisies_${date}`)
+    }
+  }
+
+  const clearFilters = () => {
+    setSearchFilters({
+      typeparc: '',
+      parc: '',
+      engin: '',
+      site: '',
+    })
+  }
+
+  // Statistiques
+  const stats = useMemo(() => {
+    if (!filteredData.length) return null
+
+    return {
+      totalEntries: filteredData.length,
+      totalHRM: filteredData.reduce((sum, item) => sum + (item.hrm || 0), 0),
+      totalHIM: filteredData.reduce((sum, item) => sum + (item.him || 0), 0),
+      uniqueEngins: new Set(filteredData.map((item) => item.engin)).size,
+    }
+  }, [filteredData])
+
+  const formatDate = (dateString) => {
+    return dateString.split('-').reverse().join('-')
+  }
 
   return (
-    <div>
-      <div className="row text-center">
-        <div className="col-sm mb-2">
-          <CButton
-            disabled={getSaisieHrmDay.isFetching || !!filteredData !== true}
-            onClick={() => exportExcel('tbl_donnees_saisies', 'Données saisies')}
-            size="sm"
-            color="success"
-            variant="outline"
-            className="rounded-pill"
-          >
-            Excel
-          </CButton>
+    <CCard>
+      <CCardHeader>
+        <h5 className="mb-0">Données de Saisie RJE</h5>
+        <small className="text-muted">Consultation et export des données HRM/HIM saisies</small>
+      </CCardHeader>
+
+      <CCardBody>
+        {/* Contrôles principaux */}
+        <div className="row g-3 mb-4">
+          <div className="col-md-3">
+            <CFormInput
+              type="month"
+              label="Période de saisie"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              disabled={isFetching}
+            />
+          </div>
+
+          <div className="col-md-9 d-flex align-items-end gap-2">
+            <CButton
+              color="primary"
+              onClick={handleGenerateReport}
+              disabled={isFetching}
+              className="d-flex align-items-center"
+            >
+              {isFetching ? (
+                <CSpinner size="sm" className="me-2" />
+              ) : (
+                <CIcon icon={cilReload} className="me-2" />
+              )}
+              Générer le rapport
+            </CButton>
+
+            <CButton
+              color="success"
+              onClick={handleExportExcel}
+              disabled={isFetching || filteredData.length === 0}
+              className="d-flex align-items-center"
+            >
+              <CIcon icon={cilCloudDownload} className="me-2" />
+              Exporter Excel
+            </CButton>
+
+            {(searchFilters.typeparc ||
+              searchFilters.parc ||
+              searchFilters.engin ||
+              searchFilters.site) && (
+              <CButton color="secondary" variant="outline" onClick={clearFilters} size="sm">
+                Effacer les filtres
+              </CButton>
+            )}
+          </div>
         </div>
 
-        <div className="col-sm mb-2 ">
-          <CFormInput
-            type="month"
-            id="floatingInputDate"
-            floatingClassName=""
-            floatingLabel="Date de saisie"
-            placeholder="pg11"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            disabled={getSaisieHrmDay.isFetching}
-          />
-        </div>
-
-        <div className="col-sm mb-2">
-          <CButton
-            disabled={getSaisieHrmDay.isFetching}
-            onClick={handleClick}
-            size="sm"
-            color="secondary"
-            variant="outline"
-            className="rounded-pill"
-          >
-            <div className="d-flex gap-1 align-items-center">
-              {getSaisieHrmDay.isFetching && <CSpinner size="sm" />}
-              <div> Générer le rapport</div>
+        {/* Filtres de recherche */}
+        <div className="row g-3 mb-4">
+          {['typeparc', 'parc', 'engin', 'site'].map((field) => (
+            <div key={field} className="col-md-3">
+              <CInputGroup>
+                <CInputGroupText>
+                  <CIcon icon={cilSearch} />
+                </CInputGroupText>
+                <CFormInput
+                  type="text"
+                  placeholder={`Rechercher par ${field === 'typeparc' ? 'type parc' : field}...`}
+                  value={searchFilters[field]}
+                  onChange={(e) => handleSearchChange(field, e.target.value)}
+                  disabled={isFetching}
+                />
+              </CInputGroup>
             </div>
-          </CButton>
-        </div>
-      </div>
-
-      <div className="row text-center">
-        <div className="col-sm mb-2">
-          <input
-            type="search"
-            className="form-control form-control-sm"
-            placeholder="Typeparc..."
-            value={searchByTypeparc}
-            onChange={(e) => setSearchByTypeparc(e.target.value)}
-          />
+          ))}
         </div>
 
-        <div className="col-sm mb-2">
-          <input
-            type="search"
-            className="form-control form-control-sm"
-            placeholder="Parc..."
-            value={searchByParc}
-            onChange={(e) => setSearchByParc(e.target.value)}
-          />
-        </div>
+        {/* Statistiques */}
+        {stats && (
+          <div className="row g-3 mb-3">
+            <div className="col-md-3">
+              <div className="border rounded p-3 text-center">
+                <h6 className="text-muted mb-1">Total Entrées</h6>
+                <h4 className="text-primary mb-0">{stats.totalEntries}</h4>
+              </div>
+            </div>
+            <div className="col-md-3">
+              <div className="border rounded p-3 text-center">
+                <h6 className="text-muted mb-1">Total HRM</h6>
+                <h4 className="text-success mb-0">{stats.totalHRM.toFixed(2)}h</h4>
+              </div>
+            </div>
+            <div className="col-md-3">
+              <div className="border rounded p-3 text-center">
+                <h6 className="text-muted mb-1">Total HIM</h6>
+                <h4 className="text-danger mb-0">{stats.totalHIM.toFixed(2)}h</h4>
+              </div>
+            </div>
+            <div className="col-md-3">
+              <div className="border rounded p-3 text-center">
+                <h6 className="text-muted mb-1">Engins Uniques</h6>
+                <h4 className="text-warning mb-0">{stats.uniqueEngins}</h4>
+              </div>
+            </div>
+          </div>
+        )}
 
-        <div className="col-sm mb-2">
-          <input
-            type="search"
-            className="form-control form-control-sm"
-            placeholder="Engin..."
-            value={searchByEngin}
-            onChange={(e) => setSearchByEngin(e.target.value)}
-          />
-        </div>
+        {/* Gestion des erreurs */}
+        {isError && (
+          <CAlert color="danger" className="mb-3">
+            <strong>Erreur lors du chargement des données :</strong>{' '}
+            {error?.message || 'Une erreur est survenue'}
+          </CAlert>
+        )}
 
-        <div className="col-sm mb-2">
-          <input
-            type="search"
-            className="form-control form-control-sm"
-            placeholder="Site..."
-            value={searchBySite}
-            onChange={(e) => setSearchBySite(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="overflow-scroll" style={{ maxHeight: '500px' }}>
-        <CTable
-          responsive
-          striped
-          hover
-          size="sm"
-          className="text-center text-uppercase "
-          id="tbl_donnees_saisies"
-        >
-          <thead>
-            <tr>
-              <td colSpan={10} className="text-start">
-                les données hrm/him saisies pour la journée du {date.split('-').reverse().join('-')}
-              </td>
-            </tr>
-
-            <tr>
-              <th>Date</th>
-              <th>Typeparc</th>
-              <th>Parc</th>
-              <th>Engin</th>
-              <th>Site</th>
-              <th>HRM</th>
-              <th>Panne</th>
-              <th>HIM</th>
-              <th>NI</th>
-              <th>LUB</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!getSaisieHrmDay.isFetching &&
-              filteredData?.map((r, i) => (
-                <tr key={i}>
-                  <td>{r?.date.split('-').reverse().join('-')}</td>
-                  <td>{r?.typeparc}</td>
-                  <td>{r?.parc}</td>
-                  <td>{r?.engin}</td>
-                  <td>{r?.site}</td>
-                  <td>{r?.hrm}</td>
-                  <td className="text-start">{r?.panne}</td>
-                  <td>{r?.him}</td>
-                  <td>{r?.ni}</td>
-                  <td>
-                    {r?.lubrifiants?.map((lub, j) => (
-                      <span key={j}>
-                        {lub?.name} ({lub?.qte}) |{' '}
-                      </span>
-                    ))}
+        {/* Tableau des données */}
+        <div className="table-responsive" style={{ maxHeight: '600px' }}>
+          <CTable
+            responsive
+            striped
+            hover
+            size="sm"
+            className="align-middle"
+            id="tbl_donnees_saisies"
+          >
+            <thead className="bg-light sticky-top">
+              <tr>
+                <th colSpan={10} className="bg-primary text-white">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span>Données HRM/HIM saisies pour {formatDate(date)}</span>
+                    {filteredData.length > 0 && (
+                      <CBadge color="light" className="text-dark">
+                        {filteredData.length} entrée(s)
+                      </CBadge>
+                    )}
+                  </div>
+                </th>
+              </tr>
+              <tr>
+                <th>Date</th>
+                <th>Type Parc</th>
+                <th>Parc</th>
+                <th>Engin</th>
+                <th>Site</th>
+                <th className="text-center">HRM</th>
+                <th>Panne</th>
+                <th className="text-center">HIM</th>
+                <th className="text-center">NI</th>
+                <th>Lubrifiants</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isFetching ? (
+                <tr>
+                  <td colSpan={10} className="text-center py-4">
+                    <CSpinner size="sm" className="me-2" />
+                    Chargement des données...
                   </td>
                 </tr>
-              ))}
-
-            {getSaisieHrmDay.isFetching && (
-              <tr>
-                <td colSpan={10} className="text-center text-primary">
-                  <CSpinner size="sm" /> Chargement...
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </CTable>
-      </div>
-    </div>
+              ) : filteredData.length > 0 ? (
+                filteredData.map((item, index) => (
+                  <tr key={`${item.date}-${item.engin}-${index}`}>
+                    <td>{formatDate(item.date)}</td>
+                    <td>
+                      <CBadge color="secondary">{item.typeparc}</CBadge>
+                    </td>
+                    <td>
+                      <CBadge color="info">{item.parc}</CBadge>
+                    </td>
+                    <td>
+                      <strong>{item.engin}</strong>
+                    </td>
+                    <td>{item.site}</td>
+                    <td className="text-center">
+                      <span className="badge bg-success">{item.hrm}h</span>
+                    </td>
+                    <td className="text-start">
+                      {item.panne ? (
+                        <small className="text-danger">{item.panne}</small>
+                      ) : (
+                        <span className="text-muted">-</span>
+                      )}
+                    </td>
+                    <td className="text-center">
+                      {item.him > 0 ? (
+                        <span className="badge bg-warning text-dark">{item.him}h</span>
+                      ) : (
+                        <span className="text-muted">-</span>
+                      )}
+                    </td>
+                    <td className="text-center">
+                      {item.ni > 0 ? (
+                        <span className="badge bg-danger">{item.ni}</span>
+                      ) : (
+                        <span className="text-muted">-</span>
+                      )}
+                    </td>
+                    <td>
+                      {item.lubrifiants?.length > 0 ? (
+                        <div>
+                          {item.lubrifiants.map((lub, idx) => (
+                            <div key={idx} className="small">
+                              <CBadge color="light" className="text-dark me-1">
+                                {lub.name}
+                              </CBadge>
+                              <small className="text-muted">({lub.qte})</small>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-muted">-</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={10} className="text-center py-4 text-muted">
+                    {data?.length === 0 ? (
+                      <>Aucune donnée disponible pour la période sélectionnée</>
+                    ) : (
+                      <>Aucun résultat ne correspond aux critères de recherche</>
+                    )}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </CTable>
+        </div>
+      </CCardBody>
+    </CCard>
   )
 }
 

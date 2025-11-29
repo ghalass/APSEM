@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { generateRjeQueryOptions } from '../../hooks/useRapports'
 import {
@@ -11,281 +11,498 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  CCard,
+  CCardBody,
+  CCardHeader,
+  CAlert,
+  CBadge,
+  CInputGroup,
+  CInputGroupText,
+  CCol,
+  CRow,
+  CContainer,
 } from '@coreui/react'
 import { exportExcel } from '../../helpers/func'
+import { cilSearch, cilCloudDownload, cilReload } from '@coreui/icons'
+import CIcon from '@coreui/icons-react'
 
 const RapportRje = () => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [searchFilters, setSearchFilters] = useState({
+    engin: '',
+    site: '',
+  })
 
-  const generateRjeQuery = useQuery(generateRjeQueryOptions(date))
+  const { data, isFetching, isError, error, refetch } = useQuery(generateRjeQueryOptions(date))
 
-  const handleClick = () => {
-    generateRjeQuery.refetch() // 🔥 Déclenche la requête au clic
+  const handleGenerateReport = () => {
+    refetch()
   }
 
-  // filter data
-  const [searchByEngin, setSearchByEngin] = useState('')
-  const [searchBySite, setSearchBySite] = useState('')
-  const filteredData = generateRjeQuery?.data?.filter(
-    (item) =>
-      item.engin?.toLowerCase().includes(searchByEngin.toLowerCase()) ||
-      item.siteName?.toLowerCase().includes(searchBySite.toLowerCase()),
-  )
+  const handleSearchChange = (field, value) => {
+    setSearchFilters((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+  }
+
+  const clearFilters = () => {
+    setSearchFilters({
+      engin: '',
+      site: '',
+    })
+  }
+
+  // Filtrage des données avec useMemo pour optimiser les performances
+  const filteredData = useMemo(() => {
+    if (!data) return []
+
+    return data.filter((item) =>
+      Object.entries(searchFilters).every(([key, value]) => {
+        if (!value) return true
+        const itemValue = item[key === 'site' ? 'siteName' : key] || ''
+        return itemValue.toString().toLowerCase().includes(value.toLowerCase())
+      }),
+    )
+  }, [data, searchFilters])
+
+  const handleExportExcel = () => {
+    if (filteredData.length > 0) {
+      exportExcel('tbl_rje', `Rapport_RJE_${date.split('-').reverse().join('-')}`)
+    }
+  }
+
+  // Statistiques
+  const stats = useMemo(() => {
+    if (!filteredData.length) return null
+
+    return {
+      totalEngins: filteredData.length,
+      moyenneDispoJ:
+        filteredData.reduce((sum, item) => sum + (parseFloat(item.dispo_j) || 0), 0) /
+        filteredData.length,
+      moyenneDispoM:
+        filteredData.reduce((sum, item) => sum + (parseFloat(item.dispo_m) || 0), 0) /
+        filteredData.length,
+      moyenneDispoA:
+        filteredData.reduce((sum, item) => sum + (parseFloat(item.dispo_a) || 0), 0) /
+        filteredData.length,
+    }
+  }, [filteredData])
+
+  const formatValue = (value, type = 'number') => {
+    if (value == null || value === '') return '-'
+    if (type === 'percent') return `${parseFloat(value).toFixed(1)}%`
+    if (type === 'number') return parseFloat(value).toFixed(1)
+    return value
+  }
+
+  const getDispoColor = (value, objectif) => {
+    const numValue = parseFloat(value) || 0
+    const numObjectif = parseFloat(objectif) || 0
+    if (numValue >= numObjectif) return 'success'
+    if (numValue >= numObjectif * 0.9) return 'warning'
+    return 'danger'
+  }
+
+  // Classes CSS adaptatives pour le thème
+  const themeClasses = {
+    tableHeader: 'bg-primary text-white',
+    secondaryBg: 'bg-body-secondary',
+    border: 'border border-secondary',
+    textMuted: 'text-body-secondary',
+  }
 
   return (
-    <div>
-      <div className="row text-center">
-        <div className="col-sm mb-2">
-          <CButton
-            disabled={generateRjeQuery.isFetching || !!generateRjeQuery?.data !== true}
-            onClick={() => exportExcel('tbl_rje', 'Rapport RJE')}
-            size="sm"
-            color="success"
-            variant="outline"
-            className="rounded-pill"
-          >
-            Excel
-          </CButton>
-        </div>
+    <CContainer fluid>
+      <CCard className="h-100">
+        <CCardHeader className="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 className="mb-1">Rapport Journalier Engins (RJE)</h5>
+            <small className={themeClasses.textMuted}>
+              Rapport de performance des engins - Journalier, Mensuel et Annuel
+            </small>
+          </div>
+        </CCardHeader>
 
-        <div className="col-sm mb-2">
-          <CFormInput
-            type="date"
-            id="floatingInpuCTableHeaderCellate"
-            floatingClassName="mb-3"
-            floatingLabel="Date de saisie"
-            placeholder="Date de saisie"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            disabled={generateRjeQuery.isFetching}
-          />
-        </div>
+        <CCardBody>
+          {/* Contrôles principaux */}
+          <CRow className="g-3 mb-4">
+            <CCol md={3}>
+              <CFormInput
+                type="date"
+                label="Date du rapport"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                disabled={isFetching}
+              />
+            </CCol>
 
-        <div className="col-sm mb-2">
-          <CButton
-            disabled={generateRjeQuery.isFetching}
-            onClick={handleClick}
-            size="sm"
-            color="secondary"
-            variant="outline"
-            className="rounded-pill"
-          >
-            <div className="d-flex gap-1 align-items-center">
-              {generateRjeQuery.isFetching && <CSpinner size="sm" />}
-              <div> Générer le rapport</div>
-            </div>
-          </CButton>
-        </div>
-      </div>
-
-      <div className="mb-2">
-        <div className="d-flex gap-2">
-          <input
-            style={{ maxWidth: '200px' }}
-            type="search"
-            className="form-control form-control-sm"
-            placeholder="Engin..."
-            value={searchByEngin}
-            onChange={(e) => setSearchByEngin(e.target.value)}
-          />
-
-          <input
-            style={{ maxWidth: '200px' }}
-            type="search"
-            className="form-control form-control-sm"
-            placeholder="Site..."
-            value={searchBySite}
-            onChange={(e) => setSearchBySite(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <CTable
-        responsive
-        striped
-        hover
-        size="sm"
-        className="text-center text-uppercase"
-        id="tbl_rje"
-      >
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell colSpan={22} className="text-start">
-              Rapport Journalier Engins RJE du {date.split('-').reverse().join('-')}
-            </CTableHeaderCell>
-          </CTableRow>
-
-          <CTableRow>
-            <CTableHeaderCell colSpan={2}></CTableHeaderCell>
-
-            <CTableHeaderCell className="text-center border-start" colSpan={10}>
-              JOURNALIER
-            </CTableHeaderCell>
-
-            <CTableHeaderCell className="text-center bg-secondary-subtle" colSpan={10}>
-              MENSUEL
-            </CTableHeaderCell>
-
-            <CTableHeaderCell className="text-center" colSpan={10}>
-              ANNUEL
-            </CTableHeaderCell>
-          </CTableRow>
-
-          <CTableRow>
-            <CTableHeaderCell colSpan={2}></CTableHeaderCell>
-
-            {/* JOURNALIER */}
-            <CTableHeaderCell className="text-center border" colSpan={4}></CTableHeaderCell>
-            <CTableHeaderCell className="text-center border" colSpan={2}>
-              DISP
-            </CTableHeaderCell>
-            <CTableHeaderCell className="text-center border" colSpan={2}>
-              MTBF
-            </CTableHeaderCell>
-            <CTableHeaderCell className="text-center border" colSpan={2}>
-              TDM
-            </CTableHeaderCell>
-
-            {/* MENSUEL */}
-            <CTableHeaderCell className="text-center" colSpan={4}></CTableHeaderCell>
-            <CTableHeaderCell className="text-center border" colSpan={2}>
-              DISP
-            </CTableHeaderCell>
-            <CTableHeaderCell className="text-center border" colSpan={2}>
-              MTBF
-            </CTableHeaderCell>
-            <CTableHeaderCell className="text-center border" colSpan={2}>
-              TDM
-            </CTableHeaderCell>
-
-            {/* ANNUEL */}
-            <CTableHeaderCell className="text-center" colSpan={4}></CTableHeaderCell>
-            <CTableHeaderCell className="text-center border" colSpan={2}>
-              DISP
-            </CTableHeaderCell>
-            <CTableHeaderCell className="text-center border" colSpan={2}>
-              MTBF
-            </CTableHeaderCell>
-            <CTableHeaderCell className="text-center border" colSpan={2}>
-              TDM
-            </CTableHeaderCell>
-          </CTableRow>
-
-          <CTableRow>
-            <CTableHeaderCell>Engin</CTableHeaderCell>
-            <CTableHeaderCell>Site</CTableHeaderCell>
-
-            {/* JOURNALIER */}
-            <CTableHeaderCell className="border-start">NHO</CTableHeaderCell>
-            <CTableHeaderCell>HRM</CTableHeaderCell>
-            <CTableHeaderCell>HIM</CTableHeaderCell>
-            <CTableHeaderCell>NI</CTableHeaderCell>
-
-            <CTableHeaderCell className="text-center border-start">réal</CTableHeaderCell>
-            <CTableHeaderCell>OBJ</CTableHeaderCell>
-
-            <CTableHeaderCell className="text-center border-start">réal</CTableHeaderCell>
-            <CTableHeaderCell>OBJ</CTableHeaderCell>
-
-            <CTableHeaderCell className="text-center border-start">réal</CTableHeaderCell>
-            <CTableHeaderCell>OBJ</CTableHeaderCell>
-
-            {/* MENSUEL */}
-            <CTableHeaderCell className="bg-secondary-subtle">NHO</CTableHeaderCell>
-            <CTableHeaderCell className="bg-secondary-subtle">HRM</CTableHeaderCell>
-            <CTableHeaderCell className="bg-secondary-subtle">HIM</CTableHeaderCell>
-            <CTableHeaderCell className="bg-secondary-subtle">NI</CTableHeaderCell>
-
-            <CTableHeaderCell className="bg-secondary-subtle">réal</CTableHeaderCell>
-            <CTableHeaderCell className="bg-secondary-subtle">Obj</CTableHeaderCell>
-
-            <CTableHeaderCell className="bg-secondary-subtle">réal</CTableHeaderCell>
-            <CTableHeaderCell className="bg-secondary-subtle">Obj</CTableHeaderCell>
-
-            <CTableHeaderCell className="bg-secondary-subtle">TDM</CTableHeaderCell>
-            <CTableHeaderCell className="bg-secondary-subtle">Obj</CTableHeaderCell>
-
-            {/* ANNUEL */}
-            <CTableHeaderCell className="border-start">NHO</CTableHeaderCell>
-            <CTableHeaderCell>HRM</CTableHeaderCell>
-            <CTableHeaderCell>HIM</CTableHeaderCell>
-            <CTableHeaderCell>NI</CTableHeaderCell>
-
-            <CTableHeaderCell className="text-center border-start">réal</CTableHeaderCell>
-            <CTableHeaderCell>OBJ</CTableHeaderCell>
-
-            <CTableHeaderCell className="text-center border-start">réal</CTableHeaderCell>
-            <CTableHeaderCell>OBJ</CTableHeaderCell>
-
-            <CTableHeaderCell className="text-center border-start">réal</CTableHeaderCell>
-            <CTableHeaderCell>OBJ</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody className="text-end">
-          {!generateRjeQuery.isFetching &&
-            filteredData?.map((r, i) => (
-              <CTableRow key={i}>
-                <CTableDataCell>{r?.engin}</CTableDataCell>
-                <CTableDataCell>{r?.siteName}</CTableDataCell>
-
-                <CTableDataCell className="border-start">{r?.nho_j}</CTableDataCell>
-                <CTableDataCell>{r?.hrm_j}</CTableDataCell>
-                <CTableDataCell>{r?.him_j}</CTableDataCell>
-                <CTableDataCell>{r?.ni_j}</CTableDataCell>
-
-                <CTableDataCell className="text-center border-start">{r?.dispo_j}</CTableDataCell>
-                <CTableDataCell>{r?.objectif_dispo}</CTableDataCell>
-
-                <CTableDataCell className="text-center border-start">{r?.mtbf_j}</CTableDataCell>
-                <CTableDataCell>{r?.objectif_mtbf}</CTableDataCell>
-
-                <CTableDataCell className="text-center border-start">{r?.tdm_j}</CTableDataCell>
-                <CTableDataCell>{r?.objectif_tdm}</CTableDataCell>
-
-                <CTableDataCell className="bg-secondary-subtle">{r?.nho_m}</CTableDataCell>
-                <CTableDataCell className="bg-secondary-subtle">{r?.hrm_m}</CTableDataCell>
-                <CTableDataCell className="bg-secondary-subtle">{r?.him_m}</CTableDataCell>
-                <CTableDataCell className="bg-secondary-subtle">{r?.ni_m}</CTableDataCell>
-
-                <CTableDataCell className="bg-secondary-subtle">{r?.dispo_m}</CTableDataCell>
-                <CTableDataCell className="bg-secondary-subtle">{r?.objectif_dispo}</CTableDataCell>
-
-                <CTableDataCell className="bg-secondary-subtle">{r?.mtbf_m}</CTableDataCell>
-                <CTableDataCell className="bg-secondary-subtle">{r?.objectif_mtbf}</CTableDataCell>
-
-                <CTableDataCell className="bg-secondary-subtle">{r?.tdm_m}</CTableDataCell>
-                <CTableDataCell className="bg-secondary-subtle">{r?.objectif_tdm}</CTableDataCell>
-
-                <CTableDataCell>{r?.nho_a}</CTableDataCell>
-                <CTableDataCell>{r?.hrm_a}</CTableDataCell>
-                <CTableDataCell>{r?.him_a}</CTableDataCell>
-                <CTableDataCell>{r?.ni_a}</CTableDataCell>
-
-                <CTableDataCell>{r?.dispo_a}</CTableDataCell>
-                <CTableDataCell>{r?.objectif_dispo}</CTableDataCell>
-
-                <CTableDataCell>{r?.mtbf_a}</CTableDataCell>
-                <CTableDataCell>{r?.objectif_mtbf}</CTableDataCell>
-
-                <CTableDataCell>{r?.tdm_a}</CTableDataCell>
-                <CTableDataCell>{r?.objectif_tdm}</CTableDataCell>
-              </CTableRow>
-            ))}
-
-          {generateRjeQuery.isFetching && (
-            <CTableRow>
-              <CTableDataCell colSpan={23} className="text-center text-primary">
-                {generateRjeQuery.isFetching && (
-                  <div>
-                    <CSpinner size="sm" /> Chargement...
-                  </div>
+            <CCol md={9} className="d-flex align-items-end gap-2">
+              <CButton
+                color="primary"
+                onClick={handleGenerateReport}
+                disabled={isFetching}
+                className="d-flex align-items-center"
+              >
+                {isFetching ? (
+                  <CSpinner size="sm" className="me-2" />
+                ) : (
+                  <CIcon icon={cilReload} className="me-2" />
                 )}
-              </CTableDataCell>
-            </CTableRow>
+                Générer le rapport
+              </CButton>
+
+              <CButton
+                color="success"
+                onClick={handleExportExcel}
+                disabled={isFetching || filteredData.length === 0}
+                className="d-flex align-items-center"
+              >
+                <CIcon icon={cilCloudDownload} className="me-2" />
+                Exporter Excel
+              </CButton>
+
+              {(searchFilters.engin || searchFilters.site) && (
+                <CButton color="secondary" variant="outline" onClick={clearFilters} size="sm">
+                  Effacer les filtres
+                </CButton>
+              )}
+            </CCol>
+          </CRow>
+
+          {/* Filtres de recherche */}
+          <CRow className="g-3 mb-4">
+            <CCol md={6}>
+              <CInputGroup>
+                <CInputGroupText>
+                  <CIcon icon={cilSearch} />
+                </CInputGroupText>
+                <CFormInput
+                  type="text"
+                  placeholder="Rechercher par engin..."
+                  value={searchFilters.engin}
+                  onChange={(e) => handleSearchChange('engin', e.target.value)}
+                  disabled={isFetching}
+                />
+              </CInputGroup>
+            </CCol>
+            <CCol md={6}>
+              <CInputGroup>
+                <CInputGroupText>
+                  <CIcon icon={cilSearch} />
+                </CInputGroupText>
+                <CFormInput
+                  type="text"
+                  placeholder="Rechercher par site..."
+                  value={searchFilters.site}
+                  onChange={(e) => handleSearchChange('site', e.target.value)}
+                  disabled={isFetching}
+                />
+              </CInputGroup>
+            </CCol>
+          </CRow>
+
+          {/* Statistiques */}
+          {stats && (
+            <CRow className="g-3 mb-4">
+              <CCol md={3}>
+                <div className={`border rounded p-3 text-center ${themeClasses.secondaryBg}`}>
+                  <h6 className={themeClasses.textMuted}>Total Engins</h6>
+                  <h4 className="text-primary mb-0">{stats.totalEngins}</h4>
+                </div>
+              </CCol>
+              <CCol md={3}>
+                <div className={`border rounded p-3 text-center ${themeClasses.secondaryBg}`}>
+                  <h6 className={themeClasses.textMuted}>Dispo Journalier</h6>
+                  <h4 className="text-success mb-0">{stats.moyenneDispoJ.toFixed(1)}%</h4>
+                </div>
+              </CCol>
+              <CCol md={3}>
+                <div className={`border rounded p-3 text-center ${themeClasses.secondaryBg}`}>
+                  <h6 className={themeClasses.textMuted}>Dispo Mensuel</h6>
+                  <h4 className="text-info mb-0">{stats.moyenneDispoM.toFixed(1)}%</h4>
+                </div>
+              </CCol>
+              <CCol md={3}>
+                <div className={`border rounded p-3 text-center ${themeClasses.secondaryBg}`}>
+                  <h6 className={themeClasses.textMuted}>Dispo Annuel</h6>
+                  <h4 className="text-warning mb-0">{stats.moyenneDispoA.toFixed(1)}%</h4>
+                </div>
+              </CCol>
+            </CRow>
           )}
-        </CTableBody>
-      </CTable>
-    </div>
+
+          {/* Gestion des erreurs */}
+          {isError && (
+            <CAlert color="danger" className="mb-3">
+              <strong>Erreur lors du chargement du rapport :</strong>{' '}
+              {error?.message || 'Une erreur est survenue'}
+            </CAlert>
+          )}
+
+          {/* Tableau des données */}
+          <div className="table-responsive" style={{ maxHeight: '600px' }}>
+            <CTable responsive striped hover className="align-middle" id="tbl_rje">
+              <CTableHead className="sticky-top">
+                {/* En-tête principal */}
+                <CTableRow>
+                  <CTableHeaderCell colSpan={32} className={themeClasses.tableHeader}>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <span>
+                        Rapport Journalier Engins RJE du {date.split('-').reverse().join('-')}
+                      </span>
+                      {filteredData.length > 0 && (
+                        <CBadge color="light" className="text-dark">
+                          {filteredData.length} engin(s)
+                        </CBadge>
+                      )}
+                    </div>
+                  </CTableHeaderCell>
+                </CTableRow>
+
+                {/* En-tête des périodes */}
+                <CTableRow>
+                  <CTableHeaderCell colSpan={2} rowSpan={2} className="align-middle border-end">
+                    Identification
+                  </CTableHeaderCell>
+                  <CTableHeaderCell colSpan={10} className="text-center border-start">
+                    JOURNALIER
+                  </CTableHeaderCell>
+                  <CTableHeaderCell
+                    colSpan={10}
+                    className="text-center border-start bg-body-tertiary"
+                  >
+                    MENSUEL
+                  </CTableHeaderCell>
+                  <CTableHeaderCell colSpan={10} className="text-center border-start">
+                    ANNUEL
+                  </CTableHeaderCell>
+                </CTableRow>
+
+                {/* En-tête des indicateurs */}
+                <CTableRow>
+                  {/* Journalier */}
+                  <CTableHeaderCell className="text-center border-start">NHO</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center">HRM</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center">HIM</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center">NI</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start" colSpan={2}>
+                    DISP
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start" colSpan={2}>
+                    MTBF
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start" colSpan={2}>
+                    TDM
+                  </CTableHeaderCell>
+
+                  {/* Mensuel */}
+                  <CTableHeaderCell className="text-center border-start bg-body-tertiary">
+                    NHO
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="text-center bg-body-tertiary">HRM</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center bg-body-tertiary">HIM</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center bg-body-tertiary">NI</CTableHeaderCell>
+                  <CTableHeaderCell
+                    className="text-center border-start bg-body-tertiary"
+                    colSpan={2}
+                  >
+                    DISP
+                  </CTableHeaderCell>
+                  <CTableHeaderCell
+                    className="text-center border-start bg-body-tertiary"
+                    colSpan={2}
+                  >
+                    MTBF
+                  </CTableHeaderCell>
+                  <CTableHeaderCell
+                    className="text-center border-start bg-body-tertiary"
+                    colSpan={2}
+                  >
+                    TDM
+                  </CTableHeaderCell>
+
+                  {/* Annuel */}
+                  <CTableHeaderCell className="text-center border-start">NHO</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center">HRM</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center">HIM</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center">NI</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start" colSpan={2}>
+                    DISP
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start" colSpan={2}>
+                    MTBF
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start" colSpan={2}>
+                    TDM
+                  </CTableHeaderCell>
+                </CTableRow>
+
+                {/* En-tête des sous-colonnes */}
+                <CTableRow>
+                  <CTableHeaderCell>Engin</CTableHeaderCell>
+                  <CTableHeaderCell className="border-end">Site</CTableHeaderCell>
+
+                  {/* Journalier */}
+                  <CTableHeaderCell className="border-start">NHO</CTableHeaderCell>
+                  <CTableHeaderCell>HRM</CTableHeaderCell>
+                  <CTableHeaderCell>HIM</CTableHeaderCell>
+                  <CTableHeaderCell>NI</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start">réal.</CTableHeaderCell>
+                  <CTableHeaderCell>objectif</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start">réal.</CTableHeaderCell>
+                  <CTableHeaderCell>objectif</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start">réal.</CTableHeaderCell>
+                  <CTableHeaderCell>objectif</CTableHeaderCell>
+
+                  {/* Mensuel */}
+                  <CTableHeaderCell className="border-start bg-body-tertiary">NHO</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary">HRM</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary">HIM</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary">NI</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start bg-body-tertiary">
+                    réal.
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary">objectif</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start bg-body-tertiary">
+                    réal.
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary">objectif</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start bg-body-tertiary">
+                    réal.
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary">objectif</CTableHeaderCell>
+
+                  {/* Annuel */}
+                  <CTableHeaderCell className="border-start">NHO</CTableHeaderCell>
+                  <CTableHeaderCell>HRM</CTableHeaderCell>
+                  <CTableHeaderCell>HIM</CTableHeaderCell>
+                  <CTableHeaderCell>NI</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start">réal.</CTableHeaderCell>
+                  <CTableHeaderCell>objectif</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start">réal.</CTableHeaderCell>
+                  <CTableHeaderCell>objectif</CTableHeaderCell>
+                  <CTableHeaderCell className="text-center border-start">réal.</CTableHeaderCell>
+                  <CTableHeaderCell>objectif</CTableHeaderCell>
+                </CTableRow>
+              </CTableHead>
+
+              <CTableBody>
+                {isFetching ? (
+                  <CTableRow>
+                    <CTableDataCell colSpan={32} className="text-center py-4">
+                      <CSpinner size="sm" className="me-2" />
+                      Chargement du rapport...
+                    </CTableDataCell>
+                  </CTableRow>
+                ) : filteredData.length > 0 ? (
+                  filteredData.map((item, index) => (
+                    <CTableRow key={`${item.engin}-${item.siteName}-${index}`}>
+                      {/* Identification */}
+                      <CTableDataCell>
+                        <strong>{item.engin}</strong>
+                      </CTableDataCell>
+                      <CTableDataCell className="border-end">
+                        <CBadge color="info">{item.siteName}</CBadge>
+                      </CTableDataCell>
+
+                      {/* Journalier */}
+                      <CTableDataCell className="border-start">
+                        {formatValue(item.nho_j)}
+                      </CTableDataCell>
+                      <CTableDataCell>{formatValue(item.hrm_j)}</CTableDataCell>
+                      <CTableDataCell>{formatValue(item.him_j)}</CTableDataCell>
+                      <CTableDataCell>{formatValue(item.ni_j)}</CTableDataCell>
+                      <CTableDataCell className="text-center border-start">
+                        <CBadge color={getDispoColor(item.dispo_j, item.objectif_dispo)}>
+                          {formatValue(item.dispo_j, 'percent')}
+                        </CBadge>
+                      </CTableDataCell>
+                      <CTableDataCell>{formatValue(item.objectif_dispo, 'percent')}</CTableDataCell>
+                      <CTableDataCell className="text-center border-start">
+                        {formatValue(item.mtbf_j)}
+                      </CTableDataCell>
+                      <CTableDataCell>{formatValue(item.objectif_mtbf)}</CTableDataCell>
+                      <CTableDataCell className="text-center border-start">
+                        {formatValue(item.tdm_j, 'percent')}
+                      </CTableDataCell>
+                      <CTableDataCell>{formatValue(item.objectif_tdm, 'percent')}</CTableDataCell>
+
+                      {/* Mensuel */}
+                      <CTableDataCell className="border-start bg-body-tertiary">
+                        {formatValue(item.nho_m)}
+                      </CTableDataCell>
+                      <CTableDataCell className="bg-body-tertiary">
+                        {formatValue(item.hrm_m)}
+                      </CTableDataCell>
+                      <CTableDataCell className="bg-body-tertiary">
+                        {formatValue(item.him_m)}
+                      </CTableDataCell>
+                      <CTableDataCell className="bg-body-tertiary">
+                        {formatValue(item.ni_m)}
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center border-start bg-body-tertiary">
+                        <CBadge color={getDispoColor(item.dispo_m, item.objectif_dispo)}>
+                          {formatValue(item.dispo_m, 'percent')}
+                        </CBadge>
+                      </CTableDataCell>
+                      <CTableDataCell className="bg-body-tertiary">
+                        {formatValue(item.objectif_dispo, 'percent')}
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center border-start bg-body-tertiary">
+                        {formatValue(item.mtbf_m)}
+                      </CTableDataCell>
+                      <CTableDataCell className="bg-body-tertiary">
+                        {formatValue(item.objectif_mtbf)}
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center border-start bg-body-tertiary">
+                        {formatValue(item.tdm_m, 'percent')}
+                      </CTableDataCell>
+                      <CTableDataCell className="bg-body-tertiary">
+                        {formatValue(item.objectif_tdm, 'percent')}
+                      </CTableDataCell>
+
+                      {/* Annuel */}
+                      <CTableDataCell className="border-start">
+                        {formatValue(item.nho_a)}
+                      </CTableDataCell>
+                      <CTableDataCell>{formatValue(item.hrm_a)}</CTableDataCell>
+                      <CTableDataCell>{formatValue(item.him_a)}</CTableDataCell>
+                      <CTableDataCell>{formatValue(item.ni_a)}</CTableDataCell>
+                      <CTableDataCell className="text-center border-start">
+                        <CBadge color={getDispoColor(item.dispo_a, item.objectif_dispo)}>
+                          {formatValue(item.dispo_a, 'percent')}
+                        </CBadge>
+                      </CTableDataCell>
+                      <CTableDataCell>{formatValue(item.objectif_dispo, 'percent')}</CTableDataCell>
+                      <CTableDataCell className="text-center border-start">
+                        {formatValue(item.mtbf_a)}
+                      </CTableDataCell>
+                      <CTableDataCell>{formatValue(item.objectif_mtbf)}</CTableDataCell>
+                      <CTableDataCell className="text-center border-start">
+                        {formatValue(item.tdm_a, 'percent')}
+                      </CTableDataCell>
+                      <CTableDataCell>{formatValue(item.objectif_tdm, 'percent')}</CTableDataCell>
+                    </CTableRow>
+                  ))
+                ) : (
+                  <CTableRow>
+                    <CTableDataCell colSpan={32} className="text-center py-4 text-muted">
+                      {data?.length === 0 ? (
+                        <>Aucune donnée disponible pour la date sélectionnée</>
+                      ) : (
+                        <>Aucun résultat ne correspond aux critères de recherche</>
+                      )}
+                    </CTableDataCell>
+                  </CTableRow>
+                )}
+              </CTableBody>
+            </CTable>
+          </div>
+        </CCardBody>
+      </CCard>
+    </CContainer>
   )
 }
 

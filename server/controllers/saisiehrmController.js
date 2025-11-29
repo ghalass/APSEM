@@ -93,7 +93,7 @@ const updateSaisieHrm = async (req, res) => {
     });
     const totlaHIM = await prisma.saisiehim.aggregate({
       _sum: { him: true },
-      where: { saisiehrmId },
+      where: { saisiehrmId: id },
     });
     const him_hrm_saisie = totlaHIM._sum.him + Number(hrm);
     let message = `HRM saisie = ${totlaHRM._sum.hrm || 0}\n`;
