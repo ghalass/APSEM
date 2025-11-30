@@ -125,21 +125,21 @@ const _nav = [
         name: 'Spéc Par Période',
         to: '/analyse/speclub_par_parc_periode',
       },
-      {
-        component: CNavItem,
-        name: 'Lubrifiants',
-        to: '/configs/lubrifiants',
-      },
-      {
-        component: CNavItem,
-        name: 'Types des lubrifiants',
-        to: '/configs/typelubrifiants',
-      },
-      {
-        component: CNavItem,
-        name: 'Codes consommation lub',
-        to: '/configs/typeconsommationlubs',
-      },
+      // {
+      //   component: CNavItem,
+      //   name: 'Lubrifiants',
+      //   to: '/configs/lubrifiants',
+      // },
+      // {
+      //   component: CNavItem,
+      //   name: 'Types des lubrifiants',
+      //   to: '/configs/typelubrifiants',
+      // },
+      // {
+      //   component: CNavItem,
+      //   name: 'Codes consommation lub',
+      //   to: '/configs/typeconsommationlubs',
+      // },
     ],
   },
 

@@ -15,7 +15,7 @@ import useSaisieRjeStore from '../../stores/useSaisieRjeStore'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useGetAllTypepannesByParcId, useTypepannes } from '../../hooks/useTypepannes'
 import { usePannesByTypePanne } from '../../hooks/usePannes'
-import { addPanneQueryOptions } from '../../hooks/useSaisieRje'
+import { useAddPanne } from '../../hooks/useSaisieRje'
 import { toast } from 'react-toastify'
 
 const SaisieRjeCreatePanneModal = () => {
@@ -29,7 +29,7 @@ const SaisieRjeCreatePanneModal = () => {
 
   const typepannesQuery = useQuery(useGetAllTypepannesByParcId(selectedFields?.parcId))
   const pannesByTypepanneQuery = useQuery(usePannesByTypePanne(selectedTypepanne))
-  const mutationAddPanneHRM = useMutation(addPanneQueryOptions(handleClosePanneModal))
+  const mutationAddPanneHRM = useMutation(useAddPanne(handleClosePanneModal))
 
   // RESET INITIAL VALUES WHEN SHOW/HIDE MODAL OR DATA CHANGED
   useEffect(() => {

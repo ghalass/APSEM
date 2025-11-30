@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useParcs } from '../../../hooks/useParcs'
 import {
   CAlert,
@@ -13,24 +13,37 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  CCard,
+  CCardBody,
+  CCardHeader,
+  CInputGroup,
+  CInputGroupText,
 } from '@coreui/react'
 import { getPerformancesEnginsPeriodeOptions } from '../../../hooks/useRapports'
 import { toast } from 'react-toastify'
 import { exportExcel } from '../../../helpers/func'
+import CIcon from '@coreui/icons-react'
+import { cilSearch, cilCloudDownload, cilChart } from '@coreui/icons'
 
 const PerformancePeriode = () => {
   const [dateDu, setDateDu] = useState(new Date().toISOString().split('T')[0])
   const [dateAu, setDateAu] = useState(new Date().toISOString().split('T')[0])
   const [selectedParc, setSelectedParc] = useState('')
   const [selectedParcName, setSelectedParcName] = useState('')
-
-  const getAllParcsQuery = useQuery(useParcs())
-
-  const getPerformancesEnginsPeriode = useQuery(
-    getPerformancesEnginsPeriodeOptions(selectedParc, dateDu, dateAu),
-  )
-
+  const [searchByEngin, setSearchByEngin] = useState('')
   const [error, setError] = useState(null)
+
+  // CORRECTION : Utilisation correcte de useQuery
+  const getAllParcsQuery = useQuery({
+    queryKey: ['parcs'],
+    queryFn: useParcs().queryFn, // Adaptez selon votre hook useParcs
+  })
+
+  // CORRECTION : Utilisation correcte de useQuery avec enabled
+  const getPerformancesEnginsPeriode = useQuery({
+    ...getPerformancesEnginsPeriodeOptions(selectedParc, dateDu, dateAu),
+    enabled: false, // Ne s'exécute pas automatiquement
+  })
 
   const handleClick = () => {
     setError(null)
@@ -42,149 +55,134 @@ const PerformancePeriode = () => {
     getPerformancesEnginsPeriode.refetch()
   }
 
-  // filter data
-  const [searchByEngin, setSearchByEngin] = useState('')
-  const filteredData = getPerformancesEnginsPeriode?.data?.filter((item) =>
-    item.engin?.toLowerCase().includes(searchByEngin.toLowerCase()),
-  )
+  const filteredData = useMemo(() => {
+    return (
+      getPerformancesEnginsPeriode?.data?.filter((item) =>
+        item.engin?.toLowerCase().includes(searchByEngin.toLowerCase()),
+      ) || []
+    )
+  }, [getPerformancesEnginsPeriode.data, searchByEngin])
+
+  const hasData =
+    !getPerformancesEnginsPeriode.isFetching &&
+    !error &&
+    selectedParc !== '' &&
+    filteredData.length > 0
 
   return (
-    <div>
-      <div className="row text-center">
-        <div className="col-sm mb-2">
-          <CButton
-            disabled={
-              getPerformancesEnginsPeriode.isFetching ||
-              !!getPerformancesEnginsPeriode?.data !== true
-            }
-            onClick={() =>
-              exportExcel('tbl_performances_engin_periode', "Analyse D'indisponibilité par engin")
-            }
-            size="sm"
-            color="success"
-            variant="outline"
-            className="rounded-pill"
-          >
-            Excel
-          </CButton>
+    <CCard className="custom-card">
+      <CCardHeader className="d-flex justify-content-between align-items-center">
+        <h5 className="mb-0">
+          <CIcon icon={cilChart} className="me-2" />
+          Performances des Engins - Période
+        </h5>
+        <CButton
+          disabled={getPerformancesEnginsPeriode.isFetching || !getPerformancesEnginsPeriode?.data}
+          onClick={() => exportExcel('tbl_performances_engin_periode', 'Performances par engin')}
+          size="sm"
+          color="success"
+          variant="outline"
+          className="rounded-pill"
+        >
+          <CIcon icon={cilCloudDownload} className="me-1" />
+          Excel
+        </CButton>
+      </CCardHeader>
+
+      <CCardBody>
+        <div className="row g-3 mb-4">
+          <div className="col-md-3">
+            <CFormSelect
+              floatingLabel="Choisir un parc"
+              value={selectedParc}
+              onChange={(e) => {
+                setSelectedParc(e.target.value)
+                setSelectedParcName(e.target.options[e.target.selectedIndex].text)
+              }}
+            >
+              <option value="">Liste des parcs</option>
+              {getAllParcsQuery.data?.map((item, index) => (
+                <option key={index} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </CFormSelect>
+          </div>
+
+          <div className="col-md-2">
+            <CFormInput
+              type="date"
+              floatingLabel="Du"
+              value={dateDu}
+              onChange={(e) => setDateDu(e.target.value)}
+              disabled={getPerformancesEnginsPeriode.isFetching}
+            />
+          </div>
+
+          <div className="col-md-2">
+            <CFormInput
+              type="date"
+              floatingLabel="Au"
+              value={dateAu}
+              onChange={(e) => setDateAu(e.target.value)}
+              disabled={getPerformancesEnginsPeriode.isFetching}
+            />
+          </div>
+
+          <div className="col-md-3 d-flex align-items-end">
+            <CButton
+              disabled={
+                getPerformancesEnginsPeriode.isFetching ||
+                selectedParc === '' ||
+                dateDu === '' ||
+                dateAu === ''
+              }
+              onClick={handleClick}
+              color="primary"
+              className="w-100"
+            >
+              <div className="d-flex gap-1 align-items-center justify-content-center">
+                {getPerformancesEnginsPeriode.isFetching && <CSpinner size="sm" />}
+                <div>Générer le rapport</div>
+              </div>
+            </CButton>
+          </div>
         </div>
 
-        <div className="col-sm mb-2">
-          <CFormSelect
-            id="floatingSelect"
-            floatingClassName="mb-3"
-            floatingLabel="Choisir un parc"
-            aria-label="Floating label select example"
-            value={selectedParc}
-            onChange={(e) => {
-              setSelectedParc(e.target.value)
-              setSelectedParcName(
-                e.target.value !== '' ? e.target.options[e.target.selectedIndex].text : '',
-              )
-            }}
-            // disabled={getParetoIndispParc.isFetching}
-          >
-            <option value="">Liste des parc</option>
-            {getAllParcsQuery.data?.map((item, index) => (
-              <option key={index} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </CFormSelect>
-        </div>
-
-        <div className="col-sm mb-2">
-          <CFormInput
-            type="date"
-            id="floatingInputDateDu"
-            floatingClassName="mb-3"
-            floatingLabel="Du"
-            placeholder="Date"
-            value={dateDu}
-            onChange={(e) => setDateDu(e.target.value)}
-            disabled={getPerformancesEnginsPeriode.isFetching}
-          />
-        </div>
-
-        <div className="col-sm mb-2">
-          <CFormInput
-            type="date"
-            id="floatingInputDateAu"
-            floatingClassName="mb-3"
-            floatingLabel="Au"
-            placeholder="Date"
-            value={dateAu}
-            onChange={(e) => setDateAu(e.target.value)}
-            disabled={getPerformancesEnginsPeriode.isFetching}
-          />
-        </div>
-
-        <div className="col-sm mb-2">
-          <CButton
-            disabled={
-              getPerformancesEnginsPeriode.isFetching ||
-              selectedParc === '' ||
-              dateDu === '' ||
-              dateAu === ''
-            }
-            onClick={handleClick}
-            size="sm"
-            color="secondary"
-            variant="outline"
-            className="rounded-pill"
-          >
-            <div className="d-flex gap-1 align-items-center">
-              {getPerformancesEnginsPeriode.isFetching && <CSpinner size="sm" />}
-              <div> Générer le rapport</div>
-            </div>
-          </CButton>
-        </div>
-      </div>
-
-      {error && (
-        <div className="d-flex justify-content-center">
-          <CAlert color="danger" className="text-center py-2">
+        {error && (
+          <CAlert color="danger" className="text-center mb-3">
             {error}
           </CAlert>
-        </div>
-      )}
+        )}
 
-      <div className="row">
-        <div className="col-sm mb-2">
-          <input
-            type="search"
-            className="form-control form-control-sm"
-            placeholder="Engin..."
-            value={searchByEngin}
-            onChange={(e) => setSearchByEngin(e.target.value)}
-          />
-        </div>
-      </div>
+        {getPerformancesEnginsPeriode.data && getPerformancesEnginsPeriode.data.length > 0 && (
+          <div className="row g-3 mb-3">
+            <div className="col-md-6">
+              <CInputGroup>
+                <CInputGroupText>
+                  <CIcon icon={cilSearch} />
+                </CInputGroupText>
+                <CFormInput
+                  placeholder="Rechercher par engin..."
+                  value={searchByEngin}
+                  onChange={(e) => setSearchByEngin(e.target.value)}
+                />
+              </CInputGroup>
+            </div>
+          </div>
+        )}
 
-      {!getPerformancesEnginsPeriode.isFetching &&
-        !error &&
-        selectedParc !== '' &&
-        getPerformancesEnginsPeriode?.data &&
-        getPerformancesEnginsPeriode?.data?.length > 0 && (
-          <div>
+        {hasData && (
+          <div className="table-responsive">
             <CTable
               responsive
               striped
               hover
               size="sm"
-              className="text-center text-uppercase"
+              className="text-center align-middle"
               id="tbl_performances_engin_periode"
             >
-              <CTableHead>
-                <CTableRow>
-                  <CTableDataCell colSpan={6} className="text-start">
-                    anlayse des performances par engin pour le parc {selectedParcName} du{' '}
-                    {dateDu.split('-').reverse().join('-')} au{' '}
-                    {dateAu.split('-').reverse().join('-')}
-                  </CTableDataCell>
-                </CTableRow>
-              </CTableHead>
-              <CTableBody className="text-start">
+              <CTableHead className="table-light">
                 <CTableRow>
                   <CTableHeaderCell>Engin</CTableHeaderCell>
                   <CTableHeaderCell>NHO</CTableHeaderCell>
@@ -195,46 +193,56 @@ const PerformancePeriode = () => {
                   <CTableHeaderCell>MTBF</CTableHeaderCell>
                   <CTableHeaderCell>UTIL</CTableHeaderCell>
                 </CTableRow>
-
-                {filteredData?.map((item, index) => (
+              </CTableHead>
+              <CTableBody>
+                {filteredData.map((item, index) => (
                   <CTableRow key={index}>
-                    <CTableDataCell>{item?.engin}</CTableDataCell>
-                    <CTableDataCell>{item?.nho}</CTableDataCell>
-                    <CTableDataCell>{item?.hrm}</CTableDataCell>
-                    <CTableDataCell>{item?.him}</CTableDataCell>
-                    <CTableDataCell>{item?.ni}</CTableDataCell>
-                    <CTableDataCell>{item?.dispo}</CTableDataCell>
-                    <CTableDataCell>{item?.mtbf}</CTableDataCell>
-                    <CTableDataCell>{item?.util}</CTableDataCell>
+                    <CTableDataCell className="fw-medium">{item?.engin || 'N/A'}</CTableDataCell>
+                    <CTableDataCell>{item?.nho || '0'}</CTableDataCell>
+                    <CTableDataCell>{item?.hrm || '0'}</CTableDataCell>
+                    <CTableDataCell>{item?.him || '0'}</CTableDataCell>
+                    <CTableDataCell>{item?.ni || '0'}</CTableDataCell>
+                    <CTableDataCell>
+                      <span
+                        className={`badge ${(parseFloat(item?.dispo) || 0) > 80 ? 'bg-success' : 'bg-warning'}`}
+                      >
+                        {item?.dispo || '0'}%
+                      </span>
+                    </CTableDataCell>
+                    <CTableDataCell>{item?.mtbf || '0'}</CTableDataCell>
+                    <CTableDataCell>
+                      <span
+                        className={`badge ${(parseFloat(item?.util) || 0) > 70 ? 'bg-success' : 'bg-info'}`}
+                      >
+                        {item?.util || '0'}%
+                      </span>
+                    </CTableDataCell>
                   </CTableRow>
                 ))}
               </CTableBody>
             </CTable>
+            <div className="text-muted mt-2">{filteredData.length} engin(s) trouvé(s)</div>
           </div>
         )}
 
-      {!getPerformancesEnginsPeriode.isFetching &&
-        getPerformancesEnginsPeriode?.data?.length === 0 &&
-        !error && (
-          <>
-            <div className="text-center text-primary">
-              Aucune données n'est enregistrée pour ce parc à cette période.
+        {!getPerformancesEnginsPeriode.isFetching &&
+          getPerformancesEnginsPeriode?.data?.length === 0 &&
+          !error &&
+          selectedParc !== '' && (
+            <div className="text-center text-muted py-4">
+              <CIcon icon={cilChart} size="xl" className="mb-2" />
+              <div>Aucune donnée de performance n'est disponible pour cette période.</div>
             </div>
-          </>
-        )}
+          )}
 
-      {getPerformancesEnginsPeriode.isFetching && (
-        <>
-          <div className="text-center text-primary">
-            {getPerformancesEnginsPeriode.isFetching && (
-              <div>
-                <CSpinner size="sm" /> Chargement...
-              </div>
-            )}
+        {getPerformancesEnginsPeriode.isFetching && (
+          <div className="text-center py-4">
+            <CSpinner color="primary" />
+            <div className="mt-2">Calcul des performances...</div>
           </div>
-        </>
-      )}
-    </div>
+        )}
+      </CCardBody>
+    </CCard>
   )
 }
 

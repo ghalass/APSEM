@@ -12,7 +12,7 @@ import {
 import React, { useEffect, useState } from 'react'
 import useSaisieRjeStore from '../../stores/useSaisieRjeStore'
 import { useMutation } from '@tanstack/react-query'
-import { upsetHRMQueryOptions } from '../../hooks/useSaisieRje'
+import { useUpsetHRM } from '../../hooks/useSaisieRje'
 import { toast } from 'react-toastify'
 
 const SaisieRjeCreateHrmModal = () => {
@@ -21,7 +21,7 @@ const SaisieRjeCreateHrmModal = () => {
 
   const [error, setError] = useState('')
 
-  const mutationUpsetHRM = useMutation(upsetHRMQueryOptions(handleCloseHRMModal))
+  const mutationUpsetHRM = useMutation(useUpsetHRM(handleCloseHRMModal))
 
   // RESET INITIAL VALUES WHEN SHOW/HIDE MODAL OR DATA CHANGED
   useEffect(() => {
