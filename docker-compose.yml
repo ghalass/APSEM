@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Changé de 5432:5432 à 5433:5432 pour éviter le conflit
     networks:
       - apsem_network
     restart: unless-stopped
