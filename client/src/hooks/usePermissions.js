@@ -5,7 +5,7 @@ import {
   createPermission,
   // updatePermission,
   deletePermission,
-} from '../api/PermissionApi'
+} from '../api/permissionApi'
 
 export const fecthPermissionsQuery = () => {
   return queryOptions({
