@@ -44,3 +44,12 @@ sudo certbot --nginx -d votre-domaine.com -d www.votre-domaine.com
 # Configurer le renouvellement automatique
 
 sudo certbot renew --dry-run
+
+# Arrêter tout
+
+docker-compose down
+
+# Supprimer volumes et images
+
+docker system prune -af
+docker volume prune -f

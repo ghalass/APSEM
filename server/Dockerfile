@@ -11,7 +11,10 @@ COPY package*.json ./
 # Copier le schéma Prisma
 COPY prisma ./prisma/
 
-# Installer les dépendances (utiliser npm install au lieu de npm ci)
+# Installer Prisma 6.19.0 explicitement
+RUN npm install prisma@6.19.0
+
+# Installer les autres dépendances de production
 RUN npm install --omit=dev
 
 # Générer le client Prisma

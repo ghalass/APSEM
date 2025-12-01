@@ -1,96 +1,126 @@
 #!/bin/bash
 
-# Couleurs pour les messages
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+echo "=== Correction FINALE Prisma ==="
+echo ""
 
-echo -e "${GREEN}=== Déploiement APSEM FINAL ===${NC}"
-
-# 1. Vérifier et libérer le port 5432
-echo -e "${YELLOW}[1/8] Vérification des ports...${NC}"
-if sudo lsof -i:5432 > /dev/null 2>&1; then
-    echo -e "${YELLOW}  → Port 5432 utilisé, libération...${NC}"
-    sudo systemctl stop postgresql 2>/dev/null || true
-    sudo kill -9 $(sudo lsof -t -i:5432) 2>/dev/null || true
-    docker stop $(docker ps -q --filter "publish=5432") 2>/dev/null || true
-    sleep 2
-fi
-
-# 2. Arrêter les conteneurs existants
-echo -e "${YELLOW}[2/8] Arrêt des conteneurs APSEM...${NC}"
+echo "1. Arrêt des services..."
 docker-compose down
+echo ""
 
-# 3. Nettoyer
-echo -e "${YELLOW}[3/8] Nettoyage...${NC}"
+echo "2. Correction package.json..."
+cd server
+
+# Backup
+cp package.json package.json.backup
+
+# Package.json correct
+cat > package.json << 'PKGEOF'
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "prisma": {
+    "seed": "node config/seed.js"
+  },
+  "keywords": [],
+  "author": "GHALASS",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": "",
+  "dependencies": {
+    "@faker-js/faker": "^9.7.0",
+    "@prisma/client": "6.19.0",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "express-validator": "^7.3.1",
+    "jsonwebtoken": "^9.0.2",
+    "prisma": "6.19.0",
+    "validator": "^13.12.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
+PKGEOF
+
+echo "3. Dockerfile corrigé..."
+cat > Dockerfile << 'DOCKEREOF'
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Installer les dépendances système pour Prisma
+RUN apk add --no-cache openssl
+
+# Étape 1: Installer Prisma 6.19.0 en PREMIER
+RUN npm init -y && npm install prisma@6.19.0
+
+# Copier package.json
+COPY package*.json ./
+
+# Copier le schéma Prisma
+COPY prisma ./prisma/
+
+# Étape 2: Installer @prisma/client 6.19.0
+RUN npm install @prisma/client@6.19.0
+
+# Étape 3: Installer les autres dépendances
+RUN npm install --omit=dev
+
+# Générer le client Prisma
+RUN npx prisma generate
+
+# Copier le code source
+COPY . .
+
+# Créer un utilisateur non-root pour la sécurité
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 && \
+    chown -R nodejs:nodejs /app
+
+USER nodejs
+
+EXPOSE 4000
+
+CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+DOCKEREOF
+
+cd ..
+echo "4. Nettoyage Docker..."
 docker system prune -af
-docker volume prune -f
+echo ""
 
-# 4. Vérifier la configuration
-echo -e "${YELLOW}[4/8] Vérification de la configuration...${NC}"
-echo "  PostgreSQL port: 5433 (externe) / 5432 (interne)"
-echo "  Backend port: 4000"
-echo "  Frontend port: 3000"
+echo "5. Reconstruction backend..."
+docker-compose build --no-cache backend
+echo ""
 
-# 5. Builder les images
-echo -e "${YELLOW}[5/8] Construction des images...${NC}"
-docker-compose build --no-cache
-
-# 6. Démarrer
-echo -e "${YELLOW}[6/8] Démarrage des services...${NC}"
+echo "6. Redémarrage..."
 docker-compose up -d
+echo ""
 
-# 7. Attendre
-echo -e "${YELLOW}[7/8] Attente du démarrage...${NC}"
+echo "7. Attente..."
 sleep 25
-
-# 8. Vérification
-echo -e "${YELLOW}[8/8] Vérification finale...${NC}"
-
 echo ""
-echo -e "${GREEN}=== STATUT DES SERVICES ===${NC}"
 
-# Vérifier PostgreSQL
-echo -n "PostgreSQL (port 5433): "
-if docker-compose exec postgres pg_isready -U apsem_user > /dev/null 2>&1; then
-    echo -e "${GREEN}✓ EN LIGNE${NC}"
-else
-    echo -e "${RED}✗ HORS LIGNE${NC}"
-    echo -e "${YELLOW}Logs PostgreSQL:${NC}"
-    docker-compose logs postgres --tail=10
-fi
-
-# Vérifier Backend
-echo -n "Backend API (port 4000): "
-if curl -s -f http://localhost:4000 > /dev/null; then
-    echo -e "${GREEN}✓ EN LIGNE${NC}"
-else
-    echo -e "${RED}✗ HORS LIGNE${NC}"
-    echo -e "${YELLOW}Logs Backend:${NC}"
-    docker-compose logs backend --tail=10
-fi
-
-# Vérifier Frontend
-echo -n "Frontend (port 3000): "
-if curl -s -f http://localhost:3000 > /dev/null; then
-    echo -e "${GREEN}✓ EN LIGNE${NC}"
-else
-    echo -e "${RED}✗ HORS LIGNE${NC}"
-    echo -e "${YELLOW}Logs Frontend:${NC}"
-    docker-compose logs frontend --tail=10
-fi
-
+echo "8. Vérification..."
+echo "8.1 Version Prisma:"
+docker-compose exec backend npx prisma --version
 echo ""
-echo -e "${GREEN}=== DÉPLOIEMENT TERMINÉ ===${NC}"
+echo "8.2 Test API:"
+curl -s http://localhost:4000 && echo "✓ Backend fonctionne" || echo "✗ Backend en erreur"
 echo ""
-echo -e "${YELLOW}URLs d'accès:${NC}"
-echo -e "  Frontend:    ${GREEN}http://147.79.118.72:3000${NC}"
-echo -e "  Backend API: ${GREEN}http://147.79.118.72:4000${NC}"
-echo -e "  PostgreSQL:  ${GREEN}147.79.118.72:5433${NC} (user: apsem_user)"
+echo "8.3 Logs backend:"
+docker-compose logs backend --tail=10
 echo ""
-echo -e "${YELLOW}Commandes utiles:${NC}"
-echo -e "  Voir tous les logs: ${GREEN}docker-compose logs -f${NC}"
-echo -e "  Voir le statut:     ${GREEN}docker-compose ps${NC}"
-echo -e "  Redémarrer:         ${GREEN}docker-compose restart${NC}"
-echo -e "  Arrêter:            ${GREEN}docker-compose down${NC}"
+echo "8.4 Statut services:"
+docker-compose ps
+echo ""
+
+echo "=== FIN ==="
