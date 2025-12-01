@@ -1,0 +1,22 @@
+@baseUrl=http://localhost:4000
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWlicDZtYWUwMDAxYm80YzhiZ21nbnZlIiwibmFtZSI6ImdoYWxhc3MiLCJlbWFpbCI6ImdoYWxhc3NAZ21haWwuY29tIiwicm9sZXMiOlt7ImlkIjoiY21pYnA2bWE5MDAwMGJvNGM1OHY3dmNteiIsIm5hbWUiOiJTdXBlciBBZG1pbiIsImNyZWF0ZWRkQXQiOiIyMDI1LTExLTIzVDEyOjMxOjU5LjMxNFoiLCJ1cGRhdGVkQXQiOiIyMDI1LTExLTIzVDEyOjMxOjU5LjMxNFoifV0sImlhdCI6MTc2MzkwMTEyNCwiZXhwIjoxNzYzOTI2MzI0fQ.tQIzG_2VtcV29I0qkzf3OgFwdqTimpXf4cEAXn9r-9A
+
+### ASSIGN ROLE TO USER
+POST {{baseUrl}}/assign/role-to-user
+Cookie: jwt={{token}}
+Content-Type: application/json
+
+{
+    "userId":"cmibtduav0001bo9siroorx14",
+    "roleId":"cmibp9hm70000bok8b160umju"
+}
+
+### ASSIGN PERMISSION TO ROLE
+POST {{baseUrl}}/assign/permission-to-role
+Cookie: jwt={{token}}
+Content-Type: application/json
+
+{
+    "roleId":"cmibp9hm70000bok8b160umju",
+    "permissionId":"cmibp5kdz000dbo8wpkzau0w0"
+}

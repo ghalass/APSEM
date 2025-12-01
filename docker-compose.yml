@@ -1,0 +1,69 @@
+services:
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: apsem_postgres
+    environment:
+      POSTGRES_USER: apsem_user
+      POSTGRES_PASSWORD: VotreMotDePasseSecurise123!
+      POSTGRES_DB: apsem_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - apsem_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apsem_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Express.js
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: apsem_backend
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DATABASE_URL=postgresql://apsem_user:VotreMotDePasseSecurise123!@postgres:5432/apsem_db
+      - ACCESS_TOKEN_SECRET=4dRyMYqKcMJK2uMkUiVAJ+PukW2vGDuAH15mW73VldY=
+      - REFRESH_TOKEN_SECRET=bkVBP2aOXv98SsZ9lvc4QKwkrS4QDO8E3+9C22KzXGU=
+      - CORS_ORIGIN=http://localhost:3000,http://147.79.118.72:3000
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - apsem_network
+    restart: unless-stopped
+    volumes:
+      - ./server:/app
+    command: sh -c "npx prisma migrate deploy && node server.js"
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        VITE_BASE_URL: http://147.79.118.72:4000
+    container_name: apsem_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - apsem_network
+    restart: unless-stopped
+
+networks:
+  apsem_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

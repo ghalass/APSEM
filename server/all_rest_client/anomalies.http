@@ -1,0 +1,43 @@
+@baseUrl=http://localhost:4000
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWlicDZtYWUwMDAxYm80YzhiZ21nbnZlIiwibmFtZSI6ImdoYWxhc3MiLCJlbWFpbCI6ImdoYWxhc3NAZ21haWwuY29tIiwicm9sZXMiOlt7ImlkIjoiY21pYnA2bWE5MDAwMGJvNGM1OHY3dmNteiIsIm5hbWUiOiJTdXBlciBBZG1pbiIsImNyZWF0ZWRBdCI6IjIwMjUtMTEtMjNUMTI6NDg6NDUuNTM0WiIsInVwZGF0ZWRBdCI6IjIwMjUtMTEtMjNUMTI6MzE6NTkuMzE0WiJ9XSwiaWF0IjoxNzYzOTg4Njk4LCJleHAiOjE3NjQwMTM4OTh9.33nsZegMwyf9mZ6uu2AAGCRphHZEbvlrjHdUNqvV6Ds
+
+
+GET {{baseUrl}}/anomalies
+Cookie: jwt={{token}}
+
+
+### CREATE
+POST {{baseUrl}}/anomalies
+Content-Type: application/json
+
+{
+  "numeroBacklog": "TO14-25-500",
+  "dateDetection": "2025-01-15T00:00:00.000Z",
+  "description": "Fuite d'huile sur vérin de direction",
+  "source": "VS",
+  "priorite": "ELEVEE",
+  "besoinPDR": true,
+  "quantite": 1,
+  "reference": "REF-12345",
+  "statut": "ATTENTE_PDR",
+  "enginId": "cmikcsf0i002pboxwwyd5pamw",
+  "siteId": "cmikahmv20003bodcz4r30q83"
+}
+
+### UPDATE
+PUT {{baseUrl}}/anomalies/13c25e39-1cf5-478c-be36-9c80427bf8e4
+Content-Type: application/json
+
+{
+  "numeroBacklog": "TO14-25-500",
+  "dateDetection": "2025-01-15T00:00:00.000Z",
+  "description": "Fuite d'huile sur vérin de direction",
+  "source": "VS",
+  "priorite": "ELEVEE",
+  "besoinPDR": true,
+  "quantite": 2,
+  "reference": "REF-12345",
+  "statut": "ATTENTE_PDR",
+  "enginId": "cmikcsf0i002pboxwwyd5pamw",
+  "siteId": "cmikahmv20003bodcz4r30q83"
+}
