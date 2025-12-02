@@ -53,6 +53,11 @@ sudo certbot renew --dry-run
 
 docker-compose down
 
+# Redémarrez les services Docker
+
+docker-compose down
+docker-compose up -d
+
 # Supprimer volumes et images
 
 docker system prune -af
@@ -74,3 +79,19 @@ netstat -ano | findstr :5433
 # OU avec Docker Desktop
 
 docker ps -a | grep 5433
+
+# lister les sites availables
+
+ls /etc/nginx/sites-available/
+
+# supprimer un site available
+
+sudo rm /etc/nginx/sites-enabled/school.conf
+
+# lister les sites enabled
+
+ls /etc/nginx/sites-enabled/
+
+# supprimer un site enabled
+
+sudo rm /etc/nginx/sites-enabled/school.conf

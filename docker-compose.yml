@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   postgres:
@@ -28,17 +27,27 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - "4000:4000"  # Expose backend sur le port 4000
+      - "4000:4000"
+    # Optionnel: monter un volume pour les logs
+    volumes:
+      - ./logs/backend:/app/logs
 
   frontend:
-    build: ./client
+    build: 
+      context: ./client
+      args:
+        VITE_BASE_URL: ${VITE_BASE_URL:-https://apsem.api.ghalass.com}
     environment:
-      VITE_API_URL: https://apsem.api.ghalass.com
       NODE_ENV: production
     depends_on:
       - backend
     ports:
-      - "3000:80"  # Expose frontend sur le port 3000
+      - "3000:80"
+    # Monter un volume pour persister les fichiers
+    volumes:
+      - apsem_frontend_data:/var/www/apsem
+      - ./logs/frontend:/var/log/nginx
 
 volumes:
   postgres_data:
+  apsem_frontend_data:

@@ -25,12 +25,19 @@ RUN pnpm run build
 # Étape d'exécution avec Nginx
 FROM nginx:alpine
 
-# Copier les fichiers buildés
-COPY --from=builder /app/build /usr/share/nginx/html
+# Créer un répertoire spécifique pour votre application
+RUN mkdir -p /var/www/apsem
+
+# Copier les fichiers buildés dans le répertoire spécifique
+COPY --from=builder /app/build /var/www/apsem
 
 # Copier la configuration Nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 3000
+# Corriger les permissions
+RUN chown -R nginx:nginx /var/www/apsem && \
+    chmod -R 755 /var/www/apsem
+
+EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
