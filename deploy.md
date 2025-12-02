@@ -15,11 +15,15 @@ cd APSEM
 
 # Donner les permissions au script
 
-chmod +x deploy.sh
+chmod +x deploy.sh setup-ssl.sh
 
 # Exécuter le déploiement
 
 ./deploy.sh
+
+# Une fois les DNS configurés, ajouter SSL
+
+./setup-ssl.sh
 
 # Voir les logs
 

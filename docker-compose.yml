@@ -1,95 +1,44 @@
+version: '3.8'
+
 services:
-  # Base de données PostgreSQL
   postgres:
     image: postgres:16-alpine
-    container_name: apsem_postgres
     environment:
-      POSTGRES_USER: apsem_user
-      POSTGRES_PASSWORD: VotreMotDePasseSecurise123!
       POSTGRES_DB: apsem_db
+      POSTGRES_USER: apsem_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-ChangeMe123!}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:5434:5432"  # Seulement local
-    networks:
-      - apsem_network
-    restart: unless-stopped
+      - "127.0.0.1:5434:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U apsem_user"]
+      test: ["CMD-SHELL", "pg_isready -U apsem_user -d apsem_db"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Backend Express.js
   backend:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    container_name: apsem_backend
+    build: ./server
     environment:
-      - NODE_ENV=production
-      - PORT=4000
-      - DATABASE_URL=postgresql://apsem_user:VotreMotDePasseSecurise123!@postgres:5432/apsem_db
-      - ACCESS_TOKEN_SECRET=4dRyMYqKcMJK2uMkUiVAJ+PukW2vGDuAH15mW73VldY=
-      - REFRESH_TOKEN_SECRET=bkVBP2aOXv98SsZ9lvc4QKwkrS4QDO8E3+9C22KzXGU=
-      - CORS_ORIGIN=http://localhost:3000,http://147.79.118.72:3000,https://apsem.ghalass.com,http://apsem.ghalass.com,https://apsem.api.ghalass.com,http://apsem.api.ghalass.com
-    expose:
-      - "4000"  # Seulement réseau Docker
+      DATABASE_URL: postgresql://apsem_user:${DB_PASSWORD:-ChangeMe123!}@postgres:5432/apsem_db
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this}
+      PORT: 4000
     depends_on:
       postgres:
         condition: service_healthy
-    networks:
-      - apsem_network
-    restart: unless-stopped
-    volumes:
-      - ./server:/app
-    command: >
-      sh -c "
-        # Installer spécifiquement Prisma 6.19.0
-        pnpm add prisma@6.19.0 @prisma/client@6.19.0 --save-exact &&
-        # Exécuter les migrations
-        pnpm exec prisma migrate deploy &&
-        # Démarrer l'application
-        pnpm start
-      "
-
-  # Frontend React
-  frontend:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-      args:
-        VITE_BASE_URL: https://apsem.api.ghalass.com  # Changé pour HTTPS
-    container_name: apsem_frontend
-    expose:
-      - "3000"  # Seulement réseau Docker
-    depends_on:
-      - backend
-    networks:
-      - apsem_network
-    restart: unless-stopped
-
-  # Nginx Proxy
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    container_name: apsem_nginx
     ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - apsem_network
-    restart: unless-stopped
-    volumes:
-      - ./nginx/ssl:/etc/nginx/ssl  # Pour les certificats SSL futurs
+      - "4000:4000"  # Expose backend sur le port 4000
 
-networks:
-  apsem_network:
-    driver: bridge
+  frontend:
+    build: ./client
+    environment:
+      VITE_API_URL: https://apsem.api.ghalass.com
+      NODE_ENV: production
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"  # Expose frontend sur le port 3000
 
 volumes:
   postgres_data:
