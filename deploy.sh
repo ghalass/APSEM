@@ -1,126 +1,172 @@
 #!/bin/bash
 
-echo "=== Correction FINALE Prisma ==="
+set -e  # Arrêter en cas d'erreur
+
+echo "=== DÉPLOIEMENT APSEM (pnpm) ==="
+echo "Date: $(date)"
 echo ""
 
-echo "1. Arrêt des services..."
-docker-compose down
+# 1. Arrêt propre
+echo "🔴 1. Arrêt des services..."
+docker-compose down || true
+echo "✅ Services arrêtés"
 echo ""
 
-echo "2. Correction package.json..."
-cd server
+# 2. Nettoyage
+echo "🧹 2. Nettoyage..."
+docker system prune -f
 
-# Backup
-cp package.json package.json.backup
-
-# Package.json correct
-cat > package.json << 'PKGEOF'
-{
-  "name": "backend",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
-  "prisma": {
-    "seed": "node config/seed.js"
-  },
-  "keywords": [],
-  "author": "GHALASS",
-  "license": "ISC",
-  "type": "commonjs",
-  "description": "",
-  "dependencies": {
-    "@faker-js/faker": "^9.7.0",
-    "@prisma/client": "6.19.0",
-    "bcryptjs": "^3.0.3",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dotenv": "^16.6.1",
-    "express": "^4.21.2",
-    "express-validator": "^7.3.1",
-    "jsonwebtoken": "^9.0.2",
-    "prisma": "6.19.0",
-    "validator": "^13.12.0"
-  },
-  "engines": {
-    "node": ">=22.12.0"
-  }
-}
-PKGEOF
-
-echo "3. Dockerfile corrigé..."
-cat > Dockerfile << 'DOCKEREOF'
-FROM node:22-alpine
-
-WORKDIR /app
-
-# Installer les dépendances système pour Prisma
-RUN apk add --no-cache openssl
-
-# Étape 1: Installer Prisma 6.19.0 en PREMIER
-RUN npm init -y && npm install prisma@6.19.0
-
-# Copier package.json
-COPY package*.json ./
-
-# Copier le schéma Prisma
-COPY prisma ./prisma/
-
-# Étape 2: Installer @prisma/client 6.19.0
-RUN npm install @prisma/client@6.19.0
-
-# Étape 3: Installer les autres dépendances
-RUN npm install --omit=dev
-
-# Générer le client Prisma
-RUN npx prisma generate
-
-# Copier le code source
-COPY . .
-
-# Créer un utilisateur non-root pour la sécurité
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 && \
-    chown -R nodejs:nodejs /app
-
-USER nodejs
-
-EXPOSE 4000
-
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
-DOCKEREOF
-
-cd ..
-echo "4. Nettoyage Docker..."
-docker system prune -af
+# Nettoyage spécifique pnpm
+echo "🧽 Nettoyage du cache pnpm..."
+docker builder prune -a -f
+echo "✅ Nettoyage terminé"
 echo ""
 
-echo "5. Reconstruction backend..."
-docker-compose build --no-cache backend
+# 3. Vérification préalable
+echo "🔍 3. Vérification des fichiers pnpm..."
+if [ ! -f "./server/pnpm-lock.yaml" ]; then
+    echo "⚠️  Attention: pnpm-lock.yaml non trouvé dans server/"
+    echo "   Exécutez: cd server && pnpm install"
+fi
+echo "✅ Vérifications terminées"
 echo ""
 
-echo "6. Redémarrage..."
+# 4. Reconstruction
+echo "🔨 4. Reconstruction des services..."
+if docker-compose build --no-cache --progress=plain; then
+    echo "✅ Services reconstruits avec succès"
+else
+    echo "❌ Échec de la reconstruction"
+    exit 1
+fi
+echo ""
+
+# 5. Démarrage
+echo "🚀 5. Démarrage des services..."
 docker-compose up -d
+echo "✅ Services démarrés"
 echo ""
 
-echo "7. Attente..."
-sleep 25
+# 6. Attente intelligente
+echo "⏳ 6. Attente du démarrage complet..."
+for i in {1..30}; do
+    if docker-compose ps postgres 2>/dev/null | grep -q "(healthy)"; then
+        echo "✅ PostgreSQL prêt après ${i}s"
+        break
+    fi
+    sleep 1
+    if [ $i -eq 30 ]; then
+        echo "⚠️  PostgreSQL lent à démarrer, poursuite..."
+    fi
+done
+
+# Attente supplémentaire pour le backend
+sleep 5
 echo ""
 
-echo "8. Vérification..."
-echo "8.1 Version Prisma:"
-docker-compose exec backend npx prisma --version
-echo ""
-echo "8.2 Test API:"
-curl -s http://localhost:4000 && echo "✓ Backend fonctionne" || echo "✗ Backend en erreur"
-echo ""
-echo "8.3 Logs backend:"
-docker-compose logs backend --tail=10
-echo ""
-echo "8.4 Statut services:"
-docker-compose ps
+# 7. Vérifications
+echo "🔍 7. Vérifications..."
+
+# 7.1 PostgreSQL
+echo "   📊 PostgreSQL:"
+if docker-compose exec -T postgres pg_isready -U postgres 2>/dev/null; then
+    echo "      ✅ Connecté"
+else
+    echo "      ❌ Non connecté"
+fi
+
+# 7.2 Backend (vérification pnpm)
+echo "   ⚙️  Backend:"
+if docker-compose ps backend 2>/dev/null | grep -q "Up"; then
+    echo "      ✅ En cours d'exécution"
+    
+    # Vérifier pnpm
+    echo "      📦 pnpm:"
+    if docker-compose exec backend pnpm --version 2>/dev/null; then
+        echo "      ✅ Installé"
+        
+        # Vérifier Prisma avec pnpm
+        echo "      🔧 Prisma:"
+        if docker-compose exec backend pnpm exec prisma --version 2>/dev/null; then
+            echo "      ✅ Version: $(docker-compose exec backend pnpm exec prisma --version 2>/dev/null)"
+        else
+            echo "      ❌ Non détecté"
+        fi
+    else
+        echo "      ❌ pnpm non disponible"
+    fi
+else
+    echo "      ❌ Backend non démarré"
+    docker-compose logs backend --tail=20
+fi
+
+# 7.3 Frontend
+echo "   🌐 Frontend:"
+if docker-compose ps frontend 2>/dev/null | grep -q "Up"; then
+    echo "      ✅ En cours d'exécution"
+else
+    echo "      ⚠️  Non démarré"
+fi
 echo ""
 
-echo "=== FIN ==="
+# 8. Migrations avec pnpm
+echo "🗃️  8. Migrations de base de données..."
+echo "   Vérification de l'état..."
+if docker-compose exec backend pnpm exec prisma migrate status 2>/dev/null; then
+    echo "   Application des migrations avec pnpm..."
+    if docker-compose exec backend pnpm exec prisma migrate deploy 2>/dev/null; then
+        echo "      ✅ Migrations appliquées"
+    else
+        echo "      ⚠️  Échec des migrations"
+        echo "      Tentative alternative..."
+        docker-compose exec backend pnpm exec prisma db push 2>/dev/null || true
+    fi
+else
+    echo "      ⚠️  Impossible de vérifier les migrations"
+fi
+echo ""
+
+# 9. Tests finaux
+echo "🧪 9. Tests finaux..."
+echo "   Test des services (attente 3 secondes)..."
+sleep 3
+
+# Tester les endpoints
+echo "   🔗 Test des connexions:"
+declare -A ENDPOINTS=(
+    ["Frontend"]="http://localhost:3000"
+    ["Backend API"]="http://localhost:4000"
+    ["Backend Health"]="http://localhost:4000/health"
+)
+
+for service in "${!ENDPOINTS[@]}"; do
+    url="${ENDPOINTS[$service]}"
+    if curl -s -f --max-time 5 "$url" > /dev/null 2>&1; then
+        echo "      ✅ $service: $url"
+    else
+        echo "      ❌ $service: $url (échec)"
+    fi
+done
+echo ""
+
+# 10. Résumé
+echo "📋 10. RÉSUMÉ DU DÉPLOIEMENT PNPM"
+echo "   Services:"
+docker-compose ps --format "table {{.Service}}\t{{.Status}}\t{{.Ports}}"
+echo ""
+echo "   🔗 URLs:"
+echo "     - Frontend:    http://localhost:3000"
+echo "     - Backend API: http://localhost:4000"
+echo "     - PostgreSQL:  localhost:5434"
+echo ""
+echo "   🛠️  Commandes pnpm:"
+echo "     - Backend shell: docker-compose exec backend sh"
+echo "     - Vérifier pnpm: docker-compose exec backend pnpm --version"
+echo "     - Prisma Studio: docker-compose exec backend pnpm exec prisma studio"
+echo "     - Logs backend: docker-compose logs -f backend"
+echo ""
+echo "   📊 Stats pnpm:"
+docker-compose exec backend pnpm store status 2>/dev/null || echo "      Store pnpm non disponible"
+
+echo ""
+echo "=== ✅ DÉPLOIEMENT PNPM TERMINÉ ==="

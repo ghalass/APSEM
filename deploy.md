@@ -29,9 +29,9 @@ docker-compose logs -f
 
 docker-compose ps
 
-# Tester l'API
+# Vérifier les logs en temps réel
 
-curl http://localhost:4000/api/health
+docker-compose logs -f backend
 
 # Installer Certbot
 
@@ -53,3 +53,20 @@ docker-compose down
 
 docker system prune -af
 docker volume prune -f
+
+# Nettoyer le cache Docker => Sur Windows avec Docker Desktop
+
+docker system prune -a --volumes
+
+# Tester l'application complète
+
+curl http://localhost:3000 # Frontend
+curl http://localhost:4000 # Backend API
+
+# Vérifier quel processus utilise le port 5433 Sur Windows (avec PowerShell ou CMD)
+
+netstat -ano | findstr :5433
+
+# OU avec Docker Desktop
+
+docker ps -a | grep 5433

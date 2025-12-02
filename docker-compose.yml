@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"  # Changé de 5432:5432 à 5433:5432 pour éviter le conflit
+      - "5434:5432"  # Changer de 5433 à 5434
     networks:
       - apsem_network
     restart: unless-stopped
@@ -43,7 +43,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./server:/app
-    command: sh -c "npx prisma migrate deploy && node server.js"
+    command: sh -c "pnpm exec prisma migrate deploy && pnpm start"
 
   # Frontend React
   frontend:

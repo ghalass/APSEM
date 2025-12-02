@@ -1,35 +1,35 @@
-FROM node:22-alpine
+FROM node:22-bookworm-slim
 
 WORKDIR /app
 
-# Installer les dépendances système pour Prisma
-RUN apk add --no-cache openssl
+# 1. Activer pnpm via corepack (méthode recommandée)
+RUN corepack enable pnpm
 
-# Copier package.json
-COPY package*.json ./
+# 2. Installer les dépendances système pour Prisma
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
-# Copier le schéma Prisma
+# 3. Copier les fichiers de configuration
+COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma/
 
-# Installer Prisma 6.19.0 explicitement
-RUN npm install prisma@6.19.0
+# 4. Installer les dépendances avec pnpm
+RUN pnpm install --frozen-lockfile
 
-# Installer les autres dépendances de production
-RUN npm install --omit=dev
+# 5. Générer le client Prisma
+RUN pnpm exec prisma generate
 
-# Générer le client Prisma
-RUN npx prisma generate
+# 6. Vérification
+RUN echo "=== VÉRIFICATION PNPM ===" && \
+    echo "1. pnpm version:" && \
+    pnpm --version && \
+    echo "2. Structure node_modules:" && \
+    ls -la node_modules/.pnpm/ 2>/dev/null || echo "Pas de .pnpm" && \
+    echo "3. Engines Prisma:" && \
+    find /app -name "*.node" -type f | grep -i prisma | head -5 || echo "Engines non trouvés"
 
-# Copier le code source
 COPY . .
-
-# Créer un utilisateur non-root pour la sécurité
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 && \
-    chown -R nodejs:nodejs /app
-
-USER nodejs
 
 EXPOSE 4000
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+# Utiliser pnpm pour démarrer
+CMD ["pnpm", "exec", "node", "server.js"]
