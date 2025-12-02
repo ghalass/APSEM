@@ -179,11 +179,19 @@ const loginUser = async (req, res) => {
     };
     // GENERATE TOKEN
     const token = generateToken(loggedUser);
+
+    // res.cookie("jwt", token, {
+    //   httpOnly: true, //accessible only by web server
+    //   secure: true, //https
+    //   sameSite: "None", //cross-site cookie
+    //   maxAge: tokenExpireIn * 60 * 60 * 1000, // tokenExpireIn * 60 * 60 * 1000 ==> hours
+    // });
+
     res.cookie("jwt", token, {
-      httpOnly: true, //accessible only by web server
-      secure: true, //https
-      sameSite: "None", //cross-site cookie
-      maxAge: tokenExpireIn * 60 * 60 * 1000, // tokenExpireIn * 60 * 60 * 1000 ==> hours
+      httpOnly: true,
+      secure: false, // ← false pour HTTP
+      sameSite: "Lax", // ← 'Lax' pour HTTP
+      maxAge: tokenExpireIn * 60 * 60 * 1000,
     });
 
     // SEND USER AND TOKEN

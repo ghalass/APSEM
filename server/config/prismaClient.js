@@ -5,7 +5,7 @@ let prisma;
 
 if (process.env.NODE_ENV === "production") {
   prisma = new PrismaClient({
-    log: ["query", "info", "warn", "error"],
+    // log: ["query", "info", "warn", "error"],
   });
 } else {
   // Correction : utilisez global au lieu de globalThis pour Node.js

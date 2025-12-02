@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:5434:5432"  # Seulement local
+      - "5434:5432"
     networks:
       - apsem_network
     restart: unless-stopped
@@ -32,9 +32,9 @@ services:
       - DATABASE_URL=postgresql://apsem_user:VotreMotDePasseSecurise123!@postgres:5432/apsem_db
       - ACCESS_TOKEN_SECRET=4dRyMYqKcMJK2uMkUiVAJ+PukW2vGDuAH15mW73VldY=
       - REFRESH_TOKEN_SECRET=bkVBP2aOXv98SsZ9lvc4QKwkrS4QDO8E3+9C22KzXGU=
-      - CORS_ORIGIN=http://localhost:3000,http://147.79.118.72:3000,https://apsem.ghalass.com,http://apsem.ghalass.com,https://apsem.api.ghalass.com,http://apsem.api.ghalass.com
-    expose:
-      - "4000"  # Seulement réseau Docker
+      - CORS_ORIGIN=http://localhost:3000,http://147.79.118.72:3000
+    ports:
+      - "4000:4000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -59,33 +59,15 @@ services:
       context: ./client
       dockerfile: Dockerfile
       args:
-        VITE_BASE_URL: https://apsem.api.ghalass.com  # Changé pour HTTPS
+        VITE_BASE_URL: http://147.79.118.72:4000
     container_name: apsem_frontend
-    expose:
-      - "3000"  # Seulement réseau Docker
-    depends_on:
-      - backend
-    networks:
-      - apsem_network
-    restart: unless-stopped
-
-  # Nginx Proxy
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    container_name: apsem_nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "3000:3000"
     depends_on:
-      - frontend
       - backend
     networks:
       - apsem_network
     restart: unless-stopped
-    volumes:
-      - ./nginx/ssl:/etc/nginx/ssl  # Pour les certificats SSL futurs
 
 networks:
   apsem_network:
