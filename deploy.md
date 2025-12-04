@@ -95,3 +95,12 @@ ls /etc/nginx/sites-enabled/
 # supprimer un site enabled
 
 sudo rm /etc/nginx/sites-enabled/school.conf
+
+# Installez certbot pour obtenir un certificat SSL gratuit
+
+sudo apt update
+sudo apt install certbot python3-certbot-nginx
+
+# Obtenez un certificat SSL ==> Cela configurera automatiquement HTTPS
+
+sudo certbot --nginx -d apsem.ghalass.com -d apsem.api.ghalass.com

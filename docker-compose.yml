@@ -36,7 +36,7 @@ services:
     build: 
       context: ./client
       args:
-        VITE_BASE_URL: ${VITE_BASE_URL:-https://apsem.api.ghalass.com}
+        VITE_BASE_URL: ${VITE_BASE_URL:-http://apsem.api.ghalass.com}
     environment:
       NODE_ENV: production
     depends_on:

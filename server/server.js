@@ -39,12 +39,12 @@ const PORT = process.env.PORT || 4000;
 
 // Enable CORS
 // app.use(cors(corsOptions)); // configuration CORS dynamiquement
-app.use(
-  cors({
-    origin: true, // ou "*" pour tout autoriser
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: true, // ou "*" pour tout autoriser
+//     credentials: true,
+//   })
+// );
 
 app.use(cookieParser());
 
